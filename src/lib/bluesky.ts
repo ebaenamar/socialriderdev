@@ -52,8 +52,8 @@ export interface Post {
   author: {
     did: string;
     handle: string;
-    displayName?: string;
-    avatar?: string;
+    displayName: string | undefined;
+    avatar: string | undefined;
   };
   record: PostRecord;
   replyCount: number;
@@ -233,8 +233,8 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
         author: {
           did: string;
           handle: string;
-          displayName?: string;
-          avatar?: string;
+          displayName: string | undefined;
+          avatar: string | undefined;
         };
         record: PostRecord;
         replyCount: number;
