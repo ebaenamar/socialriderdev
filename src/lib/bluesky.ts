@@ -391,6 +391,19 @@ export async function getPostThread(uri: string, depth: number = 1): Promise<Pos
 
     const posts: Post[] = [];
     if ('post' in thread) {
+      const record = thread.post.record as PostRecord;
+      const text = record.text.toLowerCase();
+      const hasImages = (record.embed?.images?.length ?? 0) > 0;
+      const hasVideo = record.embed?.media?.type === 'video';
+      const contentType: ContentType[] = [
+        'text',
+        ...(hasImages ? ['image'] : []),
+        ...(hasVideo ? ['video'] : []),
+      ] as ContentType[];
+
+      const sentiment = analyzeSentiment(text);
+      const topics = extractTopics(text);
+
       posts.push({
         uri: thread.post.uri,
         cid: thread.post.cid,
@@ -400,11 +413,19 @@ export async function getPostThread(uri: string, depth: number = 1): Promise<Pos
           displayName: thread.post.author.displayName,
           avatar: thread.post.author.avatar,
         },
-        record: thread.post.record,
+        record: record,
         replyCount: thread.post.replyCount,
         repostCount: thread.post.repostCount,
         likeCount: thread.post.likeCount,
         indexedAt: thread.post.indexedAt,
+        isReply: !!thread.post.record.reply,
+        isRepost: !!thread.post.record.reason?.['$type']?.includes('repost'),
+        isQuote: !!(record.embed as any)?.$type?.includes('record'),
+        metadata: {
+          contentType,
+          sentiment,
+          topics,
+        },
       });
 
       if (thread.replies) {
