@@ -7,9 +7,10 @@ import Image from 'next/image';
 interface FeedProps {
   posts: Post[];
   loading: boolean;
+  onInteraction?: (postId: string, action: 'like' | 'repost' | 'view') => void;
 }
 
-export default function Feed({ posts, loading }: FeedProps) {
+export default function Feed({ posts, loading, onInteraction }: FeedProps) {
   if (loading) {
     return (
       <div className="space-y-4">

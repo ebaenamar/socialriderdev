@@ -61,7 +61,9 @@ export interface Post {
 export type FeedType = 'timeline' | 'popular' | 'custom';
 
 export type ContentType = 'text' | 'image' | 'video';
+
 export type SentimentType = 'positive' | 'neutral' | 'negative';
+
 export type SortType = 'recent' | 'likes' | 'replies' | 'reposts';
 
 export interface TopicFilter {
