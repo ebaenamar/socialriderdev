@@ -202,6 +202,7 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
       type PostRecord = {
         text: string;
         createdAt: string;
+        langs?: string[];
         embed?: {
           images?: Array<{
             alt: string;
