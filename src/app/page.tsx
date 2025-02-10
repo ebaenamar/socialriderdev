@@ -15,7 +15,7 @@ export default function HomePage() {
   const [error, setError] = useState<string>();
   const [cursor, setCursor] = useState<string>();
   const [hasMore, setHasMore] = useState(true);
-  const [feedOptions, setFeedOptions] = useState<FeedOptions>({
+  const [feedOptions, setFeedOptions] = useState<FeedFilter & { type: FeedType }>({
     type: 'timeline',
     includeReplies: true,
     includeReposts: true,
@@ -94,10 +94,10 @@ export default function HomePage() {
               Timeline
             </button>
             <button
-              onClick={() => handleFilterChange('type', 'trending')}
-              className={`px-4 py-2 rounded-lg ${feedOptions.type === 'trending' ? 'bg-blue-500' : 'bg-white/10'}`}
+              onClick={() => handleFilterChange('type', 'popular')}
+              className={`px-4 py-2 rounded-lg ${feedOptions.type === 'popular' ? 'bg-blue-500' : 'bg-white/10'}`}
             >
-              Trending
+              Popular
             </button>
           </div>
 
