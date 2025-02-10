@@ -1,8 +1,34 @@
-import { BskyAgent } from '@atproto/api';
+import { BskyAgent, AtpSessionEvent, AtpSessionData } from '@atproto/api';
 
 export const agent = new BskyAgent({
   service: 'https://bsky.social',
+  persistSession: (evt: AtpSessionEvent, sess?: AtpSessionData) => {
+    // You can persist the session data in localStorage or another storage
+    if (evt === 'create' || evt === 'update') {
+      if (typeof window !== 'undefined' && sess) {
+        localStorage.setItem('bsky-session', JSON.stringify(sess));
+      }
+    } else if (evt === 'expired' || evt === 'create-failed') {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('bsky-session');
+      }
+    }
+  },
 });
+
+// Initialize session from storage if available
+if (typeof window !== 'undefined') {
+  const storedSession = localStorage.getItem('bsky-session');
+  if (storedSession) {
+    try {
+      const session = JSON.parse(storedSession);
+      agent.resumeSession(session);
+    } catch (error) {
+      console.error('Error resuming Bluesky session:', error);
+      localStorage.removeItem('bsky-session');
+    }
+  }
+}
 
 export interface Post {
   uri: string;
@@ -32,20 +58,160 @@ export interface Post {
   indexedAt: string;
 }
 
-export async function fetchPosts(query?: string): Promise<Post[]> {
-  try {
-    // Login with service account (optional)
-    // await agent.login({
-    //   identifier: process.env.BLUESKY_IDENTIFIER!,
-    //   password: process.env.BLUESKY_PASSWORD!,
-    // });
+export type FeedType = 'timeline' | 'popular' | 'custom';
 
-    // Get timeline
-    const response = await agent.getTimeline({ limit: 20 });
+export type ContentType = 'text' | 'image' | 'video';
+export type SentimentType = 'positive' | 'neutral' | 'negative';
+export type SortType = 'recent' | 'likes' | 'replies' | 'reposts';
+
+export interface TopicFilter {
+  includedTopics: string[];
+  excludedTopics: string[];
+}
+
+export interface ContentFilter {
+  types: ContentType[];
+  sentiment?: SentimentType;
+}
+
+export interface FeedFilter {
+  includeReplies?: boolean;
+  includeReposts?: boolean;
+  includeQuotes?: boolean;
+  languages?: string[];
+  topics?: TopicFilter;
+  content?: ContentFilter;
+  sortBy?: SortType;
+}
+
+export interface FeedOptions extends FeedFilter {
+  type: FeedType;
+  customFeedUri?: string; // For custom feeds
+}
+
+export interface FetchPostsOptions {
+  cursor?: string;
+  limit?: number;
+  query?: string;
+  feed?: FeedOptions;
+}
+
+export interface FetchPostsResult {
+  posts: Post[];
+  cursor?: string;
+}
+
+export async function login(identifier: string, password: string): Promise<boolean> {
+  try {
+    await agent.login({ identifier, password });
+    return true;
+  } catch (error) {
+    console.error('Error logging into Bluesky:', error);
+    return false;
+  }
+}
+
+export function isLoggedIn(): boolean {
+  return agent.session !== undefined;
+}
+
+function analyzeSentiment(text: string): SentimentType {
+  const positiveWords = ['love', 'great', 'awesome', 'amazing', 'good', 'happy', '❤️', '🎉', '😊'];
+  const negativeWords = ['hate', 'bad', 'terrible', 'awful', 'sad', 'angry', '😠', '😢', '💔'];
+
+  const positiveCount = positiveWords.reduce(
+    (count, word) => count + (text.toLowerCase().includes(word.toLowerCase()) ? 1 : 0),
+    0
+  );
+  const negativeCount = negativeWords.reduce(
+    (count, word) => count + (text.toLowerCase().includes(word.toLowerCase()) ? 1 : 0),
+    0
+  );
+
+  if (positiveCount > negativeCount) return 'positive';
+  if (negativeCount > positiveCount) return 'negative';
+  return 'neutral';
+}
+
+function extractTopics(text: string): string[] {
+  const topics: Set<string> = new Set();
+
+  // Extract hashtags
+  const hashtags = text.match(/#[\w-]+/g) || [];
+  hashtags.forEach(tag => topics.add(tag.slice(1)));
+
+  // Extract mentioned topics (words starting with capital letters)
+  const words = text.split(/\s+/);
+  words.forEach(word => {
+    if (/^[A-Z][a-z]{2,}/.test(word)) {
+      topics.add(word);
+    }
+  });
+
+  return Array.from(topics);
+}
+
+function sortPosts(posts: Post[], sortBy: SortType): Post[] {
+  return [...posts].sort((a, b) => {
+    switch (sortBy) {
+      case 'recent':
+        return new Date(b.indexedAt).getTime() - new Date(a.indexedAt).getTime();
+      case 'likes':
+        return b.likeCount - a.likeCount;
+      case 'replies':
+        return b.replyCount - a.replyCount;
+      case 'reposts':
+        return b.repostCount - a.repostCount;
+      default:
+        return 0;
+    }
+  });
+}
+
+export async function fetchPosts(options: FetchPostsOptions = {}): Promise<FetchPostsResult> {
+  try {
+    const { cursor, limit = 20, query, feed } = options;
+    let response;
+
+    // Get feed based on type
+    if (feed?.type === 'popular') {
+      response = await agent.app.bsky.feed.getFeed({
+        feed: 'at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot',
+        cursor,
+        limit,
+      });
+    } else if (feed?.type === 'custom' && feed.customFeedUri) {
+      response = await agent.app.bsky.feed.getFeed({
+        feed: feed.customFeedUri,
+        cursor,
+        limit,
+      });
+    } else {
+      // Default to timeline
+      response = await agent.getTimeline({ 
+        cursor,
+        limit,
+      });
+    }
     
-    // Filter posts if query is provided
-    const posts = response.data.feed
-      .map(item => ({
+    // Transform posts with enhanced metadata
+    let posts = response.data.feed.map(item => {
+      const hasImages = item.post.record.embed?.images?.length > 0;
+      const hasVideo = item.post.record.embed?.media?.type === 'video';
+      const contentType: ContentType[] = [
+        'text',
+        ...(hasImages ? ['image'] : []),
+        ...(hasVideo ? ['video'] : []),
+      ] as ContentType[];
+
+      // Simple sentiment analysis based on keywords
+      const text = item.post.record.text.toLowerCase();
+      const sentiment = analyzeSentiment(text);
+
+      // Extract hashtags and topics
+      const topics = extractTopics(text);
+
+      return {
         uri: item.post.uri,
         cid: item.post.cid,
         author: {
@@ -59,18 +225,100 @@ export async function fetchPosts(query?: string): Promise<Post[]> {
         repostCount: item.post.repostCount,
         likeCount: item.post.likeCount,
         indexedAt: item.post.indexedAt,
-      }))
-      .filter(post => 
-        !query || 
+        isReply: !!item.reply,
+        isRepost: !!item.reason?.['$type']?.includes('repost'),
+        isQuote: !!item.post.record.embed?.['$type']?.includes('record'),
+        metadata: {
+          contentType,
+          sentiment,
+          topics,
+        },
+      };
+    });
+
+    // Apply enhanced filters
+    if (feed) {
+      // Basic filters
+      if (feed.includeReplies === false) {
+        posts = posts.filter(post => !post.isReply);
+      }
+      if (feed.includeReposts === false) {
+        posts = posts.filter(post => !post.isRepost);
+      }
+      if (feed.includeQuotes === false) {
+        posts = posts.filter(post => !post.isQuote);
+      }
+      if (feed.languages?.length) {
+        posts = posts.filter(post => {
+          const postLang = post.record.langs?.[0];
+          return postLang && feed.languages?.includes(postLang);
+        });
+      }
+
+      // Topic filters
+      if (feed.topics) {
+        if (feed.topics.includedTopics.length > 0) {
+          posts = posts.filter(post =>
+            post.metadata.topics.some(topic =>
+              feed.topics!.includedTopics.some(includedTopic =>
+                topic.toLowerCase().includes(includedTopic.toLowerCase())
+              )
+            )
+          );
+        }
+        if (feed.topics.excludedTopics.length > 0) {
+          posts = posts.filter(post =>
+            !post.metadata.topics.some(topic =>
+              feed.topics!.excludedTopics.some(excludedTopic =>
+                topic.toLowerCase().includes(excludedTopic.toLowerCase())
+              )
+            )
+          );
+        }
+      }
+
+      // Content type and sentiment filters
+      if (feed.content) {
+        if (feed.content.types.length > 0) {
+          posts = posts.filter(post =>
+            post.metadata.contentType.some(type => feed.content!.types.includes(type))
+          );
+        }
+        if (feed.content.sentiment) {
+          posts = posts.filter(post => post.metadata.sentiment === feed.content!.sentiment);
+        }
+      }
+
+      // Sort posts
+      if (feed.sortBy) {
+        posts = sortPosts(posts, feed.sortBy);
+      }
+    }
+
+    // Apply search query
+    if (query) {
+      posts = posts.filter(post => 
         post.record.text.toLowerCase().includes(query.toLowerCase()) ||
         post.author.handle.toLowerCase().includes(query.toLowerCase()) ||
         (post.author.displayName && post.author.displayName.toLowerCase().includes(query.toLowerCase()))
       );
+    }
 
-    return posts;
+    return {
+      posts,
+      cursor: response.data.cursor,
+    };
   } catch (error) {
-    console.error('Error fetching Bluesky posts:', error);
-    return [];
+    if (error instanceof Error) {
+      // Check if the error is due to an expired session
+      if (error.message.includes('expired') || error.message.includes('invalid')) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('bsky-session');
+        }
+      }
+      throw new Error(`Failed to fetch posts: ${error.message}`);
+    }
+    throw new Error('Failed to fetch posts: Unknown error');
   }
 }
 
