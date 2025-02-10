@@ -1,10 +1,12 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // Allow browser usage for demo
-});
+// Initialize OpenAI client with fallback for missing API key
+const openai = typeof window === 'undefined' ? new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+}) : null;
+
+// Flag to track if we have a valid API key
+const hasValidApiKey = typeof window === 'undefined' && !!process.env.OPENAI_API_KEY;
 
 export interface UserInteraction {
   postId: string;
@@ -32,6 +34,24 @@ export async function analyzeUserPreferences(
   interactions: UserInteraction[],
   posts: any[]
 ): Promise<ContentPreferences> {
+  // Return default preferences if no API key is available
+  if (!hasValidApiKey || !openai) {
+    console.warn('OpenAI API key is missing or running in browser. Using default preferences.');
+    return {
+      topics: {
+        interested: [],
+        disinterested: []
+      },
+      contentTypes: {
+        preferred: ['text', 'image', 'video'],
+        engagement: { text: 0, image: 0, video: 0 }
+      },
+      sentiment: {
+        preferred: ['neutral'],
+        engagement: { positive: 0, neutral: 0, negative: 0 }
+      }
+    };
+  }
   // Prepare the data for analysis
   const interactionData = interactions.map(interaction => {
     const post = posts.find(p => p.uri === interaction.postId);

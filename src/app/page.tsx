@@ -9,6 +9,8 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export default function HomePage() {
+  const gradientBg = 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500';
+
   // State management
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
