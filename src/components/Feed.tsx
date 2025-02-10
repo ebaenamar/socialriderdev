@@ -2,7 +2,7 @@
 
 import { Post } from '@/lib/bluesky';
 import Image from 'next/image';
-import { formatDistanceToNow } from 'date-fns';
+
 
 interface FeedProps {
   posts: Post[];
@@ -68,7 +68,7 @@ export default function Feed({ posts, loading }: FeedProps) {
                   </span>
                 </div>
                 <span className="text-white/40 text-sm">
-                  {formatDistanceToNow(new Date(post.record.createdAt), { addSuffix: true })}
+                  {new Date(post.record.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             </div>
