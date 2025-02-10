@@ -380,7 +380,8 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
   }
 }
 
-interface ThreadViewPost {
+type ThreadViewPost = {
+  $type: string;
   post: {
     uri: string;
     cid: string;
@@ -417,9 +418,9 @@ interface ThreadViewPost {
 export async function getPostThread(uri: string, depth: number = 1): Promise<Post[]> {
   try {
     const response = await agent.getPostThread({ uri, depth });
-    const thread = response.data.thread as ThreadViewPost;
+    const thread = response.data.thread as unknown as ThreadViewPost;
     
-    if (!thread || 'notFound' in thread) {
+    if (!thread || thread.$type !== 'app.bsky.feed.defs#threadViewPost') {
       return [];
     }
 
