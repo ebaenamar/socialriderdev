@@ -198,7 +198,44 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
     
     // Transform posts with enhanced metadata
     let posts = response.data.feed.map(item => {
-      const record = item.post.record as {
+      // Type the feed item
+      interface FeedViewPost {
+        uri: string;
+        cid: string;
+        author: {
+          did: string;
+          handle: string;
+          displayName?: string;
+          avatar?: string;
+        };
+        record: {
+          text: string;
+          createdAt: string;
+          embed?: {
+            images?: Array<{
+              alt: string;
+              image: { ref: { $link: string }; mimeType: string };
+            }>;
+            media?: {
+              type: string;
+            };
+            $type?: string;
+          };
+        };
+        replyCount: number;
+        repostCount: number;
+        likeCount: number;
+        indexedAt: string;
+      }
+
+      interface FeedViewItem {
+        post: FeedViewPost;
+        reply?: unknown;
+        reason?: { $type: string };
+      }
+
+      const feedItem = item as FeedViewItem;
+      const record = feedItem.post.record as {
         text: string;
         createdAt: string;
         embed?: {
@@ -228,21 +265,21 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
       const topics = extractTopics(text);
 
       return {
-        uri: item.post.uri,
-        cid: item.post.cid,
+        uri: feedItem.post.uri,
+        cid: feedItem.post.cid,
         author: {
-          did: item.post.author.did,
-          handle: item.post.author.handle,
-          displayName: item.post.author.displayName,
-          avatar: item.post.author.avatar,
+          did: feedItem.post.author.did,
+          handle: feedItem.post.author.handle,
+          displayName: feedItem.post.author.displayName,
+          avatar: feedItem.post.author.avatar,
         },
         record: record,
-        replyCount: item.post.replyCount,
-        repostCount: item.post.repostCount,
-        likeCount: item.post.likeCount,
-        indexedAt: item.post.indexedAt,
-        isReply: !!item.reply,
-        isRepost: !!item.reason?.['$type']?.includes('repost'),
+        replyCount: feedItem.post.replyCount,
+        repostCount: feedItem.post.repostCount,
+        likeCount: feedItem.post.likeCount,
+        indexedAt: feedItem.post.indexedAt,
+        isReply: !!feedItem.reply,
+        isRepost: !!feedItem.reason?.$type?.includes('repost'),
         isQuote: !!(record.embed as any)?.$type?.includes('record'),
         metadata: {
           contentType,
