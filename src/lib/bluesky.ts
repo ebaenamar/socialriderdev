@@ -198,7 +198,22 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
     
     // Transform posts with enhanced metadata
     let posts = response.data.feed.map(item => {
-      // Type the feed item
+      // Type definitions for Bluesky feed items
+      type PostRecord = {
+        text: string;
+        createdAt: string;
+        embed?: {
+          images?: Array<{
+            alt: string;
+            image: { ref: { $link: string }; mimeType: string };
+          }>;
+          media?: {
+            type: string;
+          };
+          $type?: string;
+        };
+      };
+
       interface FeedViewPost {
         uri: string;
         cid: string;
@@ -208,20 +223,7 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
           displayName?: string;
           avatar?: string;
         };
-        record: {
-          text: string;
-          createdAt: string;
-          embed?: {
-            images?: Array<{
-              alt: string;
-              image: { ref: { $link: string }; mimeType: string };
-            }>;
-            media?: {
-              type: string;
-            };
-            $type?: string;
-          };
-        };
+        record: PostRecord;
         replyCount: number;
         repostCount: number;
         likeCount: number;
@@ -234,21 +236,11 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
         reason?: { $type: string };
       }
 
-      const feedItem = item as FeedViewItem;
-      const record = feedItem.post.record as {
-        text: string;
-        createdAt: string;
-        embed?: {
-          images?: Array<{
-            alt: string;
-            image: { ref: { $link: string }; mimeType: string };
-          }>;
-          media?: {
-            type: string;
-          };
-        };
-      };
+      // Cast the feed item and extract the record
+      const feedItem = item as unknown as FeedViewItem;
+      const record = feedItem.post.record;
 
+      // Process the record
       const hasImages = (record.embed?.images?.length ?? 0) > 0;
       const hasVideo = record.embed?.media?.type === 'video';
       const contentType: ContentType[] = [
