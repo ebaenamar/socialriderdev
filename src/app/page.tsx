@@ -252,7 +252,7 @@ export default function Home() {
     );
   };
 
-  const renderContent = () => (
+  return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 py-8 relative">
         {/* Decorative elements */}
@@ -505,5 +505,4 @@ export default function Home() {
       </footer>
     </div>
   );
-  return renderContent();
 }
