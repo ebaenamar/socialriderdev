@@ -380,17 +380,51 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
   }
 }
 
+interface ThreadViewPost {
+  post: {
+    uri: string;
+    cid: string;
+    author: {
+      did: string;
+      handle: string;
+      displayName?: string;
+      avatar?: string;
+    };
+    record: {
+      text: string;
+      createdAt: string;
+      reply?: unknown;
+      embed?: {
+        images?: Array<{
+          alt: string;
+          image: { ref: { $link: string }; mimeType: string };
+        }>;
+        media?: {
+          type: string;
+        };
+        $type?: string;
+      };
+      reason?: { $type: string };
+    };
+    replyCount: number;
+    repostCount: number;
+    likeCount: number;
+    indexedAt: string;
+  };
+  replies?: ThreadViewPost[];
+}
+
 export async function getPostThread(uri: string, depth: number = 1): Promise<Post[]> {
   try {
     const response = await agent.getPostThread({ uri, depth });
-    const thread = response.data.thread;
+    const thread = response.data.thread as ThreadViewPost;
     
-    if (!thread || thread.notFound) {
+    if (!thread || 'notFound' in thread) {
       return [];
     }
 
     const posts: Post[] = [];
-    if ('post' in thread) {
+    if (thread.post) {
       const record = thread.post.record as PostRecord;
       const text = record.text.toLowerCase();
       const hasImages = (record.embed?.images?.length ?? 0) > 0;
