@@ -465,7 +465,20 @@ export async function getPostThread(uri: string, depth: number = 1): Promise<Pos
 
       if (thread.replies) {
         thread.replies.forEach(reply => {
-          if ('post' in reply) {
+          if (reply.$type === 'app.bsky.feed.defs#threadViewPost') {
+            const replyRecord = reply.post.record;
+            const text = replyRecord.text.toLowerCase();
+            const hasImages = (replyRecord.embed?.images?.length ?? 0) > 0;
+            const hasVideo = replyRecord.embed?.media?.type === 'video';
+            const contentType: ContentType[] = [
+              'text',
+              ...(hasImages ? ['image'] : []),
+              ...(hasVideo ? ['video'] : []),
+            ] as ContentType[];
+
+            const sentiment = analyzeSentiment(text);
+            const topics = extractTopics(text);
+
             posts.push({
               uri: reply.post.uri,
               cid: reply.post.cid,
@@ -475,11 +488,19 @@ export async function getPostThread(uri: string, depth: number = 1): Promise<Pos
                 displayName: reply.post.author.displayName,
                 avatar: reply.post.author.avatar,
               },
-              record: reply.post.record,
+              record: replyRecord,
               replyCount: reply.post.replyCount,
               repostCount: reply.post.repostCount,
               likeCount: reply.post.likeCount,
               indexedAt: reply.post.indexedAt,
+              isReply: !!replyRecord.reply,
+              isRepost: !!replyRecord.reason?.['$type']?.includes('repost'),
+              isQuote: !!(replyRecord.embed as any)?.$type?.includes('record'),
+              metadata: {
+                contentType,
+                sentiment,
+                topics,
+              },
             });
           }
         });
