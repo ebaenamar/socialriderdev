@@ -67,7 +67,12 @@ Format the response as a JSON object matching the ContentPreferences type.`;
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(completion.choices[0].message.content);
+    const content = completion.choices[0].message.content;
+    if (!content) {
+      throw new Error('No content in OpenAI response');
+    }
+
+    const result = JSON.parse(content);
     return result as ContentPreferences;
   } catch (error) {
     console.error('Error analyzing preferences:', error);
