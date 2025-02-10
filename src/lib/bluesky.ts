@@ -198,8 +198,22 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
     
     // Transform posts with enhanced metadata
     let posts = response.data.feed.map(item => {
-      const hasImages = item.post.record.embed?.images?.length > 0;
-      const hasVideo = item.post.record.embed?.media?.type === 'video';
+      const record = item.post.record as {
+        text: string;
+        createdAt: string;
+        embed?: {
+          images?: Array<{
+            alt: string;
+            image: { ref: { $link: string }; mimeType: string };
+          }>;
+          media?: {
+            type: string;
+          };
+        };
+      };
+
+      const hasImages = record.embed?.images?.length > 0;
+      const hasVideo = record.embed?.media?.type === 'video';
       const contentType: ContentType[] = [
         'text',
         ...(hasImages ? ['image'] : []),
@@ -207,7 +221,7 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
       ] as ContentType[];
 
       // Simple sentiment analysis based on keywords
-      const text = item.post.record.text.toLowerCase();
+      const text = record.text.toLowerCase();
       const sentiment = analyzeSentiment(text);
 
       // Extract hashtags and topics
@@ -222,14 +236,14 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
           displayName: item.post.author.displayName,
           avatar: item.post.author.avatar,
         },
-        record: item.post.record,
+        record: record,
         replyCount: item.post.replyCount,
         repostCount: item.post.repostCount,
         likeCount: item.post.likeCount,
         indexedAt: item.post.indexedAt,
         isReply: !!item.reply,
         isRepost: !!item.reason?.['$type']?.includes('repost'),
-        isQuote: !!item.post.record.embed?.['$type']?.includes('record'),
+        isQuote: !!(record.embed as any)?.$type?.includes('record'),
         metadata: {
           contentType,
           sentiment,
