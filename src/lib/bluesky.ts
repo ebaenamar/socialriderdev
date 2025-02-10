@@ -212,7 +212,7 @@ export async function fetchPosts(options: FetchPostsOptions = {}): Promise<Fetch
         };
       };
 
-      const hasImages = record.embed?.images?.length > 0;
+      const hasImages = (record.embed?.images?.length ?? 0) > 0;
       const hasVideo = record.embed?.media?.type === 'video';
       const contentType: ContentType[] = [
         'text',
