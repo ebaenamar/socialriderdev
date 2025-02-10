@@ -220,37 +220,32 @@ export default function Home() {
     }));
   };
 
-  const renderMainContent = () => {
-    if (error) {
-      return (
-        <div className="text-center py-12 glass-card p-6">
-          <svg className="h-12 w-12 text-rose-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <p className="text-rose-400 text-lg font-medium mb-2">{error}</p>
-          <p className="text-white/70 text-sm">Please try again later</p>
+  // Render main content with error handling
+  const mainContent = error ? (
+    <div className="text-center py-12 glass-card p-6">
+      <svg className="h-12 w-12 text-rose-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <p className="text-rose-400 text-lg font-medium mb-2">{error}</p>
+      <p className="text-white/70 text-sm">Please try again later</p>
+    </div>
+  ) : (
+    <div>
+      <Feed posts={posts} loading={loading} />
+      
+      {hasMore && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => loadPosts(true)}
+            disabled={loading}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Loading...' : 'Load More'}
+          </button>
         </div>
-      );
-    }
-
-    return (
-      <div>
-        <Feed posts={posts} loading={loading} />
-        
-        {hasMore && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => loadPosts(true)}
-              disabled={loading}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? 'Loading...' : 'Load More'}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
+      )}
+    </div>
+  );
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white overflow-hidden">
@@ -496,7 +491,7 @@ export default function Home() {
           </div>
         </div>
 
-        {renderMainContent()}
+        {mainContent}
       </div>
       <footer className="py-8 border-t border-white/10 mt-12">
         <div className="max-w-5xl mx-auto px-4 text-center text-white/40">
