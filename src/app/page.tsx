@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Post, fetchPosts, FeedType, FeedFilter } from '@/lib/bluesky';
+import { Post, fetchPosts, FeedType, FeedOptions } from '@/lib/bluesky';
 import { trackInteraction, analyzeUserPreferences } from '@/lib/ai';
 import Feed from '@/components/Feed';
 import { Inter } from 'next/font/google';
@@ -15,7 +15,7 @@ export default function HomePage() {
   const [error, setError] = useState<string>();
   const [cursor, setCursor] = useState<string>();
   const [hasMore, setHasMore] = useState(true);
-  const [feedOptions, setFeedOptions] = useState<FeedFilter>({
+  const [feedOptions, setFeedOptions] = useState<FeedOptions>({
     type: 'timeline',
     includeReplies: true,
     includeReposts: true,
