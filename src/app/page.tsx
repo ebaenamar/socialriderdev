@@ -20,7 +20,7 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [feedOptions, setFeedOptions] = useState<FeedOptions>({
-    type: 'timeline',
+    type: 'timeline' as FeedType,
     includeReplies: true,
     includeReposts: true,
     includeQuotes: true,
@@ -29,7 +29,7 @@ export default function HomePage() {
       excludedTopics: [],
     },
     content: {
-      types: ['text', 'image', 'video'],
+      types: ['text', 'image', 'video'] as ('text' | 'image' | 'video')[],
       sentiment: undefined,
     },
     sortBy: 'recent',
@@ -137,11 +137,11 @@ export default function HomePage() {
                       <label key={type} className="flex items-center text-white/70 hover:text-white transition-colors">
                         <input
                           type="checkbox"
-                          checked={feedOptions.content.types.includes(type as any)}
+                          checked={feedOptions.content?.types?.includes(type as 'text' | 'image' | 'video') ?? false}
                           onChange={(e) => {
                             const types = e.target.checked
-                              ? [...feedOptions.content.types, type]
-                              : feedOptions.content.types.filter(t => t !== type);
+                              ? [...(feedOptions.content?.types ?? []), type]
+                              : (feedOptions.content?.types ?? []).filter(t => t !== type);
                             handleFilterChange('content', { ...feedOptions.content, types });
                           }}
                           className="mr-2 h-4 w-4 rounded border-white/30 text-purple-500 focus:ring-purple-500"
