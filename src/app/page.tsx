@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Post, fetchPosts, FetchPostsResult, FeedType, FeedOptions } from '@/lib/bluesky';
+import { trackInteraction, analyzeUserPreferences, type UserInteraction } from '@/lib/ai';
 import Feed from '@/components/Feed';
 
 function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -32,12 +33,23 @@ const defaultFeedOptions: FeedOptions = {
   sortBy: 'recent',
 };
 
-import { trackInteraction, analyzeUserPreferences, type UserInteraction } from '../lib/ai';
-import { useEffect, useRef } from 'react';
-
 export default function Home() {
+  // State declarations
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cursor, setCursor] = useState<string>();
+  const [hasMore, setHasMore] = useState(true);
+  const [feedOptions, setFeedOptions] = useState<FeedOptions>(defaultFeedOptions);
+  const [customFeedUri, setCustomFeedUri] = useState('');
+  const [topicInput, setTopicInput] = useState('');
+  const [excludeTopicInput, setExcludeTopicInput] = useState('');
+
+  // Refs
   const observerRef = useRef<IntersectionObserver>();
   const postTimers = useRef<Map<string, number>>(new Map());
+
 
   useEffect(() => {
     // Set up intersection observer for post visibility tracking
@@ -206,6 +218,38 @@ export default function Home() {
           : [...prev.content!.types, type],
       },
     }));
+  };
+
+  const renderMainContent = () => {
+    if (error) {
+      return (
+        <div className="text-center py-12 glass-card p-6">
+          <svg className="h-12 w-12 text-rose-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p className="text-rose-400 text-lg font-medium mb-2">{error}</p>
+          <p className="text-white/70 text-sm">Please try again later</p>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <Feed posts={posts} loading={loading} />
+        
+        {hasMore && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => loadPosts(true)}
+              disabled={loading}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? 'Loading...' : 'Load More'}
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -452,31 +496,7 @@ export default function Home() {
           </div>
         </div>
 
-        {error ? (
-          <div className="text-center py-12 glass-card p-6">
-            <svg className="h-12 w-12 text-rose-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <p className="text-rose-400 text-lg font-medium mb-2">{error}</p>
-            <p className="text-white/70 text-sm">Please try again later</p>
-          </div>
-        ) : (
-          <div>
-            <Feed posts={posts} loading={loading} />
-            
-            {hasMore && (
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => loadPosts(true)}
-                  disabled={loading}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? 'Loading...' : 'Load More'}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {renderMainContent()}
       </div>
       <footer className="py-8 border-t border-white/10 mt-12">
         <div className="max-w-5xl mx-auto px-4 text-center text-white/40">
