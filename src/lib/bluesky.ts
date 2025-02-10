@@ -30,6 +30,22 @@ if (typeof window !== 'undefined') {
   }
 }
 
+export type PostRecord = {
+  text: string;
+  createdAt: string;
+  langs?: string[];
+  embed?: {
+    images?: Array<{
+      alt: string;
+      image: { ref: { $link: string }; mimeType: string };
+    }>;
+    media?: {
+      type: string;
+    };
+    $type?: string;
+  };
+};
+
 export interface Post {
   uri: string;
   cid: string;
@@ -39,23 +55,19 @@ export interface Post {
     displayName?: string;
     avatar?: string;
   };
-  record: {
-    text: string;
-    createdAt: string;
-    embed?: {
-      images?: Array<{
-        alt: string;
-        image: {
-          ref: { $link: string };
-          mimeType: string;
-        };
-      }>;
-    };
-  };
+  record: PostRecord;
   replyCount: number;
   repostCount: number;
   likeCount: number;
   indexedAt: string;
+  isReply: boolean;
+  isRepost: boolean;
+  isQuote: boolean;
+  metadata: {
+    contentType: ContentType[];
+    sentiment: SentimentType;
+    topics: string[];
+  };
 }
 
 export type FeedType = 'timeline' | 'popular' | 'custom';
