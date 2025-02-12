@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Post, fetchPosts, FeedType, FeedOptions } from '@/lib/bluesky';
+import { Post, fetchPosts, FeedType, FeedOptions, isLoggedIn } from '@/lib/bluesky';
 import { trackInteraction, analyzeUserPreferences } from '@/lib/ai';
 import Feed from '@/components/Feed';
 import LoginForm from '@/components/LoginForm';
@@ -9,16 +9,23 @@ import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
+/**
+ * Main homepage component for the Social Rider application
+ * Manages feed state, user authentication, and content filtering
+ */
 export default function HomePage() {
+  // Styling constants
   const gradientBg = 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500';
 
-  // State management
+  // Feed state management
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [cursor, setCursor] = useState<string>();
   const [hasMore, setHasMore] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedInState, setIsLoggedInState] = useState(false);
+
+  // Feed options state
   const [feedOptions, setFeedOptions] = useState<FeedOptions>({
     type: 'timeline' as FeedType,
     includeReplies: true,
@@ -29,37 +36,54 @@ export default function HomePage() {
       excludedTopics: [],
     },
     content: {
-      types: ['text', 'image', 'video'] as ('text' | 'image' | 'video')[],
+      types: ['text', 'image', 'video'],
       sentiment: undefined,
     },
     sortBy: 'recent',
   });
 
-  // Load posts
+  /**
+   * Loads posts from the API with optional pagination
+   * @param {boolean} append - Whether to append to existing posts or replace them
+   */
   const loadPosts = useCallback(async (append = false) => {
     try {
       setLoading(true);
+      setError(undefined);
+
       const result = await fetchPosts({
         cursor: append ? cursor : undefined,
         ...feedOptions,
       });
+
       setPosts(prev => append ? [...prev, ...result.posts] : result.posts);
       setCursor(result.cursor);
       setHasMore(!!result.cursor);
-      setError(undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load posts');
+      console.error('Error loading posts:', err);
     } finally {
       setLoading(false);
     }
   }, [cursor, feedOptions]);
 
-  // Initial load
+  // Check login status and load initial posts
   useEffect(() => {
-    loadPosts();
+    const checkLoginAndLoadPosts = async () => {
+      const loggedIn = isLoggedIn();
+      setIsLoggedInState(loggedIn);
+      if (loggedIn) {
+        await loadPosts();
+      }
+    };
+    checkLoginAndLoadPosts();
   }, [loadPosts]);
 
-  // Track interactions
+  /**
+   * Handles user interactions with posts
+   * @param {string} postId - ID of the post interacted with
+   * @param {'like' | 'repost' | 'view'} action - Type of interaction
+   */
   const handleInteraction = useCallback((postId: string, action: 'like' | 'repost' | 'view') => {
     trackInteraction({
       postId,
@@ -68,7 +92,11 @@ export default function HomePage() {
     });
   }, []);
 
-  // Update feed options
+  /**
+   * Updates feed options and triggers a reload
+   * @param {keyof FeedOptions} key - Option key to update
+   * @param {any} value - New value for the option
+   */
   const handleFilterChange = useCallback((key: keyof FeedOptions, value: any) => {
     setFeedOptions(prev => ({
       ...prev,
@@ -78,7 +106,7 @@ export default function HomePage() {
 
   return (
     <div className={`min-h-screen ${gradientBg} ${inter.className}`}>
-      {/* Decorative elements */}
+      {/* Decorative background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
         <div className="absolute top-0 right-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
@@ -94,10 +122,10 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 pt-24 pb-8 relative min-h-screen">
-        {!isLoggedIn ? (
+        {!isLoggedInState ? (
           <div className="pt-12">
             <LoginForm onSuccess={() => {
-              setIsLoggedIn(true);
+              setIsLoggedInState(true);
               loadPosts();
             }} />
           </div>
@@ -106,7 +134,7 @@ export default function HomePage() {
             {/* Feed controls */}
             <div className="glass-card p-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Feed type */}
+                {/* Feed type selection */}
                 <div>
                   <label className="block text-sm font-medium text-white/80 mb-2">
                     Feed Type
@@ -114,20 +142,28 @@ export default function HomePage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleFilterChange('type', 'timeline')}
-                      className={`flex-1 px-4 py-2 rounded-lg transition-colors ${feedOptions.type === 'timeline' ? 'bg-purple-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+                      className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                        feedOptions.type === 'timeline' 
+                          ? 'bg-purple-500 text-white' 
+                          : 'bg-white/10 text-white/70 hover:bg-white/20'
+                      }`}
                     >
                       Timeline
                     </button>
                     <button
                       onClick={() => handleFilterChange('type', 'popular')}
-                      className={`flex-1 px-4 py-2 rounded-lg transition-colors ${feedOptions.type === 'popular' ? 'bg-purple-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+                      className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                        feedOptions.type === 'popular' 
+                          ? 'bg-purple-500 text-white' 
+                          : 'bg-white/10 text-white/70 hover:bg-white/20'
+                      }`}
                     >
                       Popular
                     </button>
                   </div>
                 </div>
 
-                {/* Content types */}
+                {/* Content type filters */}
                 <div>
                   <label className="block text-sm font-medium text-white/80 mb-2">
                     Content Types
@@ -137,7 +173,7 @@ export default function HomePage() {
                       <label key={type} className="flex items-center text-white/70 hover:text-white transition-colors">
                         <input
                           type="checkbox"
-                          checked={feedOptions.content?.types?.includes(type as 'text' | 'image' | 'video') ?? false}
+                          checked={feedOptions.content?.types?.includes(type as 'text' | 'image' | 'video')}
                           onChange={(e) => {
                             const types = e.target.checked
                               ? [...(feedOptions.content?.types ?? []), type]
@@ -152,7 +188,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Post types */}
+                {/* Post type filters */}
                 <div>
                   <label className="block text-sm font-medium text-white/80 mb-2">
                     Post Types
@@ -200,7 +236,7 @@ export default function HomePage() {
                     <button
                       onClick={() => loadPosts(true)}
                       disabled={loading}
-                      className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="glass-button px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {loading ? 'Loading...' : 'Load More'}
                     </button>

@@ -2,86 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: #000000;
+    --foreground: #ffffff;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 min-h-screen text-white;
+    background-attachment: fixed;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Modern Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-black/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-purple-500/50 rounded-full hover:bg-purple-500/70 transition-colors;
+  }
+}
+
 @layer components {
   .glass-card {
-    @apply backdrop-blur-md bg-white/10 rounded-2xl border border-white/20;
+    @apply rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10 
+           hover:bg-white/10 transition-colors;
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-button {
+    @apply px-4 py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/10
+           hover:bg-white/20 transition-all duration-300 ease-out
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20
+           text-white placeholder-white/40
+           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+           transition-all duration-300;
   }
 }
 
-@layer utilities {
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 @keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes gradient {
+  to { background-position: 200% center; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Animation Classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
 }
 
 .animate-blob {
   animation: blob 7s infinite;
 }
 
-@layer utilities {
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
+.animation-delay-2000 {
+  animation-delay: 2s;
 }
 
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
+.animation-delay-4000 {
+  animation-delay: 4s;
 }
 
-.animate-blob {
-  animation: blob 7s infinite;
+/* Gradient Text Animation */
+.animate-gradient {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient 8s linear infinite;
 }
 
-/* Modern Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #2563eb, #7c3aed);
+/* Shimmer Loading Effect */
+.shimmer {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.1) 40%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 /* Smooth transitions */
@@ -99,62 +138,4 @@
 .hover-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-/* Gradient text animation */
-.animate-gradient {
-  background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 8s linear infinite;
-}
-
-@keyframes gradient {
-  to {
-    background-position: 200% center;
-  }
-}
-
-/* Shimmer loading effect */
-.shimmer {
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.2) 20%,
-    rgba(255, 255, 255, 0.1) 40%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-:root {
-  --background: #000000;
-  --foreground: #ffffff;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-@layer components {
-  .glass-card {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg;
-  }
-
-  .glass-card:hover {
-    @apply bg-white/10 transition-colors;
-  }
 }

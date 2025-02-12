@@ -3,30 +3,46 @@ import { BskyAgent, AtpSessionEvent, AtpSessionData } from '@atproto/api';
 export const agent = new BskyAgent({
   service: 'https://bsky.social',
   persistSession: (evt: AtpSessionEvent, sess?: AtpSessionData) => {
-    // You can persist the session data in localStorage or another storage
-    if (evt === 'create' || evt === 'update') {
-      if (typeof window !== 'undefined' && sess) {
-        localStorage.setItem('bsky-session', JSON.stringify(sess));
-      }
-    } else if (evt === 'expired' || evt === 'create-failed') {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('bsky-session');
-      }
+    if (typeof window === 'undefined') return;
+
+    switch (evt) {
+      case 'create':
+      case 'update':
+        if (sess) {
+          try {
+            localStorage.setItem('bsky-session', JSON.stringify(sess));
+          } catch (error) {
+            console.error('Error persisting session:', error);
+          }
+        }
+        break;
+      case 'expired':
+      case 'create-failed':
+        try {
+          localStorage.removeItem('bsky-session');
+        } catch (error) {
+          console.error('Error removing session:', error);
+        }
+        break;
     }
   },
 });
 
 // Initialize session from storage if available
 if (typeof window !== 'undefined') {
-  const storedSession = localStorage.getItem('bsky-session');
-  if (storedSession) {
-    try {
+  try {
+    const storedSession = localStorage.getItem('bsky-session');
+    if (storedSession) {
       const session = JSON.parse(storedSession);
-      agent.resumeSession(session);
-    } catch (error) {
-      console.error('Error resuming Bluesky session:', error);
-      localStorage.removeItem('bsky-session');
+      if (session?.accessJwt && session?.refreshJwt) {
+        agent.resumeSession(session);
+      } else {
+        localStorage.removeItem('bsky-session');
+      }
     }
+  } catch (error) {
+    console.error('Error initializing session:', error);
+    localStorage.removeItem('bsky-session');
   }
 }
 
@@ -117,11 +133,31 @@ export interface FetchPostsResult {
 
 export async function login(identifier: string, password: string): Promise<boolean> {
   try {
-    await agent.login({ identifier, password });
+    // Clear any existing session first
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('bsky-session');
+    }
+
+    // Attempt to login
+    await agent.login({ identifier, password })
+      .catch(error => {
+        console.error('Login error:', error);
+        let message = 'Failed to login';
+        
+        if (error.status === 401) {
+          message = 'Invalid username or password';
+        } else if (error.status === 429) {
+          message = 'Too many login attempts. Please try again later.';
+        } else if (!navigator.onLine) {
+          message = 'No internet connection. Please check your network.';
+        }
+        
+        throw new Error(message);
+      });
+
     return true;
   } catch (error) {
-    console.error('Error logging into Bluesky:', error);
-    return false;
+    throw error;
   }
 }
 

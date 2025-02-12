@@ -30,6 +30,46 @@ export interface ContentPreferences {
   };
 }
 
+/**
+ * Creates a prompt for OpenAI analysis based on user interactions
+ * @param interactions - Array of user interactions
+ * @param posts - Array of posts that were interacted with
+ * @returns Formatted prompt string
+ */
+function createAnalysisPrompt(interactions: UserInteraction[], posts: any[]): string {
+  const interactionData = interactions.map(interaction => {
+    const post = posts.find(p => p.uri === interaction.postId);
+    return {
+      ...interaction,
+      content: post ? {
+        text: post.record.text,
+        topics: post.metadata?.topics,
+        contentType: post.metadata?.contentType,
+        sentiment: post.metadata?.sentiment,
+      } : null,
+    };
+  });
+
+  return `Analyze these user interactions with social media posts and determine their content preferences. Do not include any personal or identifying information in the analysis.
+
+Interactions:
+${JSON.stringify(interactionData, null, 2)}
+
+Provide a structured analysis of:
+1. Topics they seem interested in
+2. Topics they seem to avoid
+3. Preferred content types (text, image, video)
+4. Sentiment preferences
+
+Format the response as a JSON object matching the ContentPreferences type.`;
+}
+
+/**
+ * Analyzes user preferences based on their interactions with posts
+ * @param interactions - Array of user interactions
+ * @param posts - Array of posts that were interacted with
+ * @returns Content preferences based on analysis
+ */
 export async function analyzeUserPreferences(
   interactions: UserInteraction[],
   posts: any[]
@@ -52,35 +92,10 @@ export async function analyzeUserPreferences(
       }
     };
   }
-  // Prepare the data for analysis
-  const interactionData = interactions.map(interaction => {
-    const post = posts.find(p => p.uri === interaction.postId);
-    return {
-      ...interaction,
-      content: post ? {
-        text: post.record.text,
-        topics: post.metadata?.topics,
-        contentType: post.metadata?.contentType,
-        sentiment: post.metadata?.sentiment,
-      } : null,
-    };
-  });
-
-  // Create a prompt for OpenAI
-  const prompt = `Analyze these user interactions with social media posts and determine their content preferences. Do not include any personal or identifying information in the analysis.
-
-Interactions:
-${JSON.stringify(interactionData, null, 2)}
-
-Provide a structured analysis of:
-1. Topics they seem interested in
-2. Topics they seem to avoid
-3. Preferred content types (text, image, video)
-4. Sentiment preferences
-
-Format the response as a JSON object matching the ContentPreferences type.`;
 
   try {
+    const prompt = createAnalysisPrompt(interactions, posts);
+    
     const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "gpt-4-turbo-preview",
@@ -92,8 +107,13 @@ Format the response as a JSON object matching the ContentPreferences type.`;
       throw new Error('No content in OpenAI response');
     }
 
-    const result = JSON.parse(content);
-    return result as ContentPreferences;
+    try {
+      const result = JSON.parse(content);
+      return result as ContentPreferences;
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      throw new Error('Failed to parse AI response');
+    }
   } catch (error) {
     console.error('Error analyzing preferences:', error);
     return {
@@ -110,17 +130,25 @@ Format the response as a JSON object matching the ContentPreferences type.`;
   }
 }
 
-export function trackInteraction(interaction: UserInteraction) {
-  // Store interaction in localStorage
-  const interactions = JSON.parse(
-    localStorage.getItem('userInteractions') || '[]'
-  ) as UserInteraction[];
+/**
+ * Tracks user interaction with posts in localStorage
+ * @param interaction - The interaction to track
+ */
+export function trackInteraction(interaction: UserInteraction): void {
+  try {
+    // Store interaction in localStorage
+    const interactions = JSON.parse(
+      localStorage.getItem('userInteractions') || '[]'
+    ) as UserInteraction[];
 
-  // Keep only last 100 interactions to respect privacy and storage
-  interactions.push(interaction);
-  if (interactions.length > 100) {
-    interactions.shift();
+    // Keep only last 100 interactions to respect privacy and storage
+    interactions.push(interaction);
+    if (interactions.length > 100) {
+      interactions.shift();
+    }
+
+    localStorage.setItem('userInteractions', JSON.stringify(interactions));
+  } catch (error) {
+    console.error('Error tracking interaction:', error);
   }
-
-  localStorage.setItem('userInteractions', JSON.stringify(interactions));
 }
