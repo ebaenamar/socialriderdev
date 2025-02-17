@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { HeartIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { usePreferences } from '@/contexts/PreferencesContext';
 
@@ -49,10 +48,7 @@ export default function WellnessProfile() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="bg-white rounded-lg shadow-lg p-6 mb-8"
+    <div className="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 ease-in-out"
     >
       <div className="flex items-center space-x-3 mb-6">
         <HeartIcon className="h-6 w-6 text-rose-500" />
@@ -198,6 +194,6 @@ export default function WellnessProfile() {
         </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
