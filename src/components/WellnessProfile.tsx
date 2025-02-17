@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { HeartIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
