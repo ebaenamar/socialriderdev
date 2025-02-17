@@ -176,7 +176,7 @@ export default function VideoFeed() {
                 </a>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </InfiniteScroll>
     </div>
