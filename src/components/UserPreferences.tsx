@@ -65,7 +65,7 @@ export default function UserPreferences() {
               <span className="ml-3">
                 <span className="text-sm font-medium text-gray-900">Break out of the echo chamber</span>
                 <p className="text-xs text-gray-500 mt-1">
-                  When enabled, we'll actively look for content that presents different viewpoints
+                  When enabled, we&apos;ll actively look for content that presents different viewpoints
                   and challenges your current perspectives.
                 </p>
               </span>
@@ -143,7 +143,7 @@ export default function UserPreferences() {
                     rows={3}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     placeholder="e.g., Find content that explains complex technical concepts in simple terms, focuses on practical applications, and includes demonstrations or examples."
-              aria-label="Enter your algorithm's filtering rules"
+              aria-label="Enter your algorithm&apos;s filtering rules"
                   />
                 </div>
                 <button
