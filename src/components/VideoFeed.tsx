@@ -163,8 +163,8 @@ export default function VideoFeed() {
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
             </div>
             <div className="p-6">
-              <h3 className="font-bold text-xl mb-2 line-clamp-2">{video.snippet.title}</h3>
-              <p className="text-gray-600 mb-4">{video.snippet.channelTitle}</p>
+              <h3 className="font-bold text-2xl text-gray-900 mb-2 line-clamp-2 tracking-tight">{video.snippet.title}</h3>
+              <p className="text-base font-medium text-gray-700 mb-4">{video.snippet.channelTitle}</p>
               <div className="flex justify-between items-center">
                 <a
                   href={`https://www.youtube.com/shorts/${video.id}`}
