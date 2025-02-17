@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+'use client';
+
 import { BeakerIcon, LightBulbIcon, GlobeAltIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 const features = [
@@ -71,12 +72,10 @@ export default function Features() {
         <div className="mt-10">
           <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
             {features.map((feature, index) => (
-              <motion.div 
+              <div 
                 key={feature.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative"
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="relative opacity-0 animate-fadeIn"
               >
                 <dt>
                   <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
@@ -92,7 +91,7 @@ export default function Features() {
                     ))}
                   </ul>
                 </dd>
-              </motion.div>
+              </div>
             ))}
           </dl>
         </div>
