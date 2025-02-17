@@ -61,13 +61,14 @@ export default function WellnessProfile() {
   }, [sessionStartTime, scrollCount, lateNightUsage, preferences.wellnessProfile, rapidScrollThreshold, updatePreferences]);
 
   const getEngagementStatus = () => {
-    const { engagementPatterns } = preferences.wellnessProfile;
-    const highEngagement = 
-      engagementPatterns.rapidScrolling ||
-      engagementPatterns.lateNightUsage ||
-      engagementPatterns.timeSpent > 1; // More than 1 minute for testing
+    const patterns = preferences.wellnessProfile?.engagementPatterns;
+    if (!patterns) return false;
 
-    return highEngagement;
+    return (
+      patterns.rapidScrolling ||
+      patterns.lateNightUsage ||
+      patterns.timeSpent > 1
+    );
   };
 
   return (
@@ -89,7 +90,7 @@ export default function WellnessProfile() {
             <h3 className="text-lg font-semibold text-gray-900">Time Spent</h3>
           </div>
           <p className="text-3xl font-bold text-indigo-600">
-            {preferences.wellnessProfile.engagementPatterns.timeSpent} min
+            {preferences.wellnessProfile?.engagementPatterns?.timeSpent || 0} min
           </p>
         </div>
 
@@ -98,8 +99,8 @@ export default function WellnessProfile() {
             <ChartBarIcon className="h-6 w-6 text-indigo-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">Scroll Activity</h3>
           </div>
-          <p className={`text-2xl font-bold ${preferences.wellnessProfile.engagementPatterns.rapidScrolling ? 'text-amber-500' : 'text-indigo-600'}`}>
-            {preferences.wellnessProfile.engagementPatterns.rapidScrolling ? 'High' : 'Normal'}
+          <p className={`text-2xl font-bold ${preferences.wellnessProfile?.engagementPatterns?.rapidScrolling ? 'text-amber-500' : 'text-indigo-600'}`}>
+            {preferences.wellnessProfile?.engagementPatterns?.rapidScrolling ? 'High' : 'Normal'}
           </p>
         </div>
 
@@ -108,8 +109,8 @@ export default function WellnessProfile() {
             <SparklesIcon className="h-6 w-6 text-indigo-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">Usage Pattern</h3>
           </div>
-          <p className={`text-2xl font-bold ${preferences.wellnessProfile.engagementPatterns.lateNightUsage ? 'text-amber-500' : 'text-indigo-600'}`}>
-            {preferences.wellnessProfile.engagementPatterns.lateNightUsage ? 'Late Night' : 'Regular Hours'}
+          <p className={`text-2xl font-bold ${preferences.wellnessProfile?.engagementPatterns?.lateNightUsage ? 'text-amber-500' : 'text-indigo-600'}`}>
+            {preferences.wellnessProfile?.engagementPatterns?.lateNightUsage ? 'Late Night' : 'Regular Hours'}
           </p>
         </div>
       </div>
