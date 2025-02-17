@@ -121,8 +121,8 @@ export default function VideoFeed() {
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search for topics like 'science', 'art', 'technology'..."
-            className="w-full p-4 pr-12 text-lg border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-colors"
+            placeholder="Type 'sad', 'happy', 'motivated' or any topic..."
+            className="w-full p-4 pr-12 text-lg border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-colors bg-white text-gray-900 placeholder-gray-500 shadow-sm"
           />
           <button
             type="submit"

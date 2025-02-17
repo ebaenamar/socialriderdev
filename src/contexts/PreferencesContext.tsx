@@ -85,10 +85,24 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   }, [preferences]);
 
   const updatePreferences = (newPreferences: Partial<UserPreferences>) => {
-    setPreferences(prev => ({
-      ...prev,
-      ...newPreferences
-    }));
+    setPreferences(prev => {
+      const updated = {
+        ...prev,
+        ...newPreferences,
+        wellnessProfile: {
+          ...prev.wellnessProfile,
+          ...(newPreferences.wellnessProfile || {}),
+          engagementPatterns: {
+            ...prev.wellnessProfile.engagementPatterns,
+            ...(newPreferences.wellnessProfile?.engagementPatterns || {})
+          }
+        }
+      };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('userPreferences', JSON.stringify(updated));
+      }
+      return updated;
+    });
   };
 
   const getActivePrompts = () => {

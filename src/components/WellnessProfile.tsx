@@ -8,7 +8,7 @@ export default function WellnessProfile() {
   const { preferences, updatePreferences } = usePreferences();
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [scrollCount, setScrollCount] = useState(0);
-  const [rapidScrollThreshold] = useState(50); // Scrolls per minute threshold
+  const [rapidScrollThreshold] = useState(10); // Lower threshold for testing
   const [lateNightUsage, setLateNightUsage] = useState(false);
 
   useEffect(() => {
@@ -30,9 +30,9 @@ export default function WellnessProfile() {
 
     // Set up event listeners
     window.addEventListener('scroll', handleScroll);
-    const lateNightInterval = setInterval(checkLateNightUsage, 60000); // Check every minute
+    const lateNightInterval = setInterval(checkLateNightUsage, 10000); // Check every 10 seconds
 
-    // Update engagement patterns every minute
+    // Update engagement patterns every 10 seconds
     const updateInterval = setInterval(() => {
       if (sessionStartTime) {
         const timeSpent = Math.floor((new Date().getTime() - sessionStartTime.getTime()) / 60000); // in minutes
@@ -51,7 +51,7 @@ export default function WellnessProfile() {
           }
         });
       }
-    }, 60000);
+    }, 10000);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -65,7 +65,7 @@ export default function WellnessProfile() {
     const highEngagement = 
       engagementPatterns.rapidScrolling ||
       engagementPatterns.lateNightUsage ||
-      engagementPatterns.timeSpent > 120; // More than 2 hours
+      engagementPatterns.timeSpent > 1; // More than 1 minute for testing
 
     return highEngagement;
   };
@@ -83,32 +83,32 @@ export default function WellnessProfile() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center mb-2">
-            <ClockIcon className="h-5 w-5 text-indigo-500 mr-2" />
-            <h3 className="font-medium">Time Spent</h3>
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors">
+          <div className="flex items-center mb-3">
+            <ClockIcon className="h-6 w-6 text-indigo-600 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Time Spent</h3>
           </div>
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-indigo-600">
             {preferences.wellnessProfile.engagementPatterns.timeSpent} min
           </p>
         </div>
 
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center mb-2">
-            <ChartBarIcon className="h-5 w-5 text-indigo-500 mr-2" />
-            <h3 className="font-medium">Scroll Activity</h3>
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors">
+          <div className="flex items-center mb-3">
+            <ChartBarIcon className="h-6 w-6 text-indigo-600 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Scroll Activity</h3>
           </div>
-          <p className="text-lg font-medium text-gray-900">
+          <p className={`text-2xl font-bold ${preferences.wellnessProfile.engagementPatterns.rapidScrolling ? 'text-amber-500' : 'text-indigo-600'}`}>
             {preferences.wellnessProfile.engagementPatterns.rapidScrolling ? 'High' : 'Normal'}
           </p>
         </div>
 
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center mb-2">
-            <SparklesIcon className="h-5 w-5 text-indigo-500 mr-2" />
-            <h3 className="font-medium">Usage Pattern</h3>
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors">
+          <div className="flex items-center mb-3">
+            <SparklesIcon className="h-6 w-6 text-indigo-600 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Usage Pattern</h3>
           </div>
-          <p className="text-lg font-medium text-gray-900">
+          <p className={`text-2xl font-bold ${preferences.wellnessProfile.engagementPatterns.lateNightUsage ? 'text-amber-500' : 'text-indigo-600'}`}>
             {preferences.wellnessProfile.engagementPatterns.lateNightUsage ? 'Late Night' : 'Regular Hours'}
           </p>
         </div>
