@@ -57,10 +57,8 @@ export default function UserPreferences() {
                   checked={preferences.outOfEchoChamber}
                   onChange={(e) => handlePreferenceChange('outOfEchoChamber', e.target.checked)}
                 />
-                <div className="w-10 h-6 bg-gray-200 rounded-full shadow-inner"></div>
-                <div className={`absolute w-4 h-4 top-1 left-1 bg-white rounded-full transition-transform ${
-                  preferences.outOfEchoChamber ? 'translate-x-4' : ''
-                }`}></div>
+                <div className={`w-10 h-6 rounded-full shadow-inner transition-colors ${preferences.outOfEchoChamber ? 'bg-indigo-500' : 'bg-gray-200'}`}></div>
+                <div className={`absolute w-4 h-4 top-1 left-1 bg-white rounded-full shadow transition-transform ${preferences.outOfEchoChamber ? 'translate-x-4' : ''}`}></div>
               </div>
               <span className="ml-3">
                 <span className="text-sm font-medium text-gray-900">Break out of the echo chamber</span>
