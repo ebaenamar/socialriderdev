@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -29,7 +29,7 @@ interface VideoResponse {
 export default function VideoFeed() {
   const [topic, setTopic] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [showPreferences, setShowPreferences] = useState(false);
+
   const { preferences } = usePreferences();
   
   const fetchVideos = async ({ pageParam = '' }) => {
@@ -64,14 +64,30 @@ export default function VideoFeed() {
   };
 
   if (isLoading) return (
-    <div className="flex justify-center items-center min-h-[400px]">
+    <div className="flex flex-col justify-center items-center min-h-[400px] space-y-4">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <p className="text-gray-600">Curating content based on your preferences...</p>
+      {preferences.outOfEchoChamber && (
+        <p className="text-sm text-indigo-600">Looking for diverse perspectives...</p>
+      )}
     </div>
   );
   
   if (isError) return (
-    <div className="flex justify-center items-center min-h-[400px] text-red-600">
-      <p>Error loading videos. Please try again later.</p>
+    <div className="flex flex-col justify-center items-center min-h-[400px] space-y-4">
+      <div className="text-red-600 mb-2">
+        <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <p className="text-red-600 font-medium">Error loading videos</p>
+      <p className="text-gray-500 text-sm">Please check your connection and try again</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+      >
+        Retry
+      </button>
     </div>
   );
 
@@ -79,15 +95,18 @@ export default function VideoFeed() {
 
   return (
     <div id="feed" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {allVideos.length === 0 && !isLoading && (
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-4">No videos found matching your criteria</p>
+          <p className="text-sm text-gray-400">Try adjusting your search terms or preferences</p>
+        </div>
+      )}
       <div className="max-w-3xl mx-auto mb-12">
         <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => setShowPreferences(!showPreferences)}
-            className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors"
-          >
+          <div className="flex items-center space-x-2 text-gray-600">
             <AdjustmentsHorizontalIcon className="h-5 w-5" />
-            <span>Preferences</span>
-          </button>
+            <span>Active Filters</span>
+          </div>
           {preferences.outOfEchoChamber && (
             <span className="text-sm text-indigo-600">
               Echo Chamber Protection: Active

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BeakerIcon, LightBulbIcon, GlobeAltIcon, SparklesIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { BeakerIcon, LightBulbIcon, GlobeAltIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 const features = [
   {

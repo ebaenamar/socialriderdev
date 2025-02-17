@@ -1,55 +1,26 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BeakerIcon, AdjustmentsHorizontalIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { AdjustmentsHorizontalIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
-interface AlgorithmPrompt {
-  name: string;
-  prompt: string;
-  active: boolean;
-}
-
-interface UserPreferences {
-  outOfEchoChamber: boolean;
-  contentTypes: string[];
-  customPrompts: AlgorithmPrompt[];
-}
-
-const defaultPreferences: UserPreferences = {
-  outOfEchoChamber: false,
-  contentTypes: ['educational', 'entertainment', 'news'],
-  customPrompts: [
-    {
-      name: 'Diverse Perspectives',
-      prompt: 'Find content that presents different viewpoints on the topic',
-      active: false
-    },
-    {
-      name: 'Deep Analysis',
-      prompt: 'Prioritize content with in-depth analysis and expert insights',
-      active: false
-    }
-  ]
-};
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 export default function UserPreferences() {
-  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
+  const { preferences, updatePreferences } = usePreferences();
   const [newPrompt, setNewPrompt] = useState({ name: '', prompt: '' });
   const [showPromptForm, setShowPromptForm] = useState(false);
 
-  const handlePreferenceChange = (key: keyof UserPreferences, value: any) => {
-    setPreferences(prev => ({
-      ...prev,
+  const handlePreferenceChange = (key: string, value: boolean | string[] | { name: string; prompt: string; active: boolean }[]) => {
+    updatePreferences({
       [key]: value
-    }));
+    });
   };
 
   const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newPrompt.name && newPrompt.prompt) {
-      setPreferences(prev => ({
-        ...prev,
-        customPrompts: [...prev.customPrompts, { ...newPrompt, active: true }]
-      }));
+      updatePreferences({
+        customPrompts: [...preferences.customPrompts, { ...newPrompt, active: true }]
+      });
       setNewPrompt({ name: '', prompt: '' });
       setShowPromptForm(false);
     }
