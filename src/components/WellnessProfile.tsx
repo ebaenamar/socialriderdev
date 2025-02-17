@@ -1,67 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import { HeartIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { usePreferences } from '@/contexts/PreferencesContext';
+import React from 'react';
 
-export default function WellnessProfile(): JSX.Element {
-  const { preferences, updatePreferences } = usePreferences();
-  const [expandedSection, setExpandedSection] = useState<string | null>('issues');
-
-  const focusIssues = [
-    { id: 'adhd', label: 'ADHD', description: 'Difficulty focusing or managing time' },
-    { id: 'depression', label: 'Depression', description: 'Feeling down or lacking motivation' },
-    { id: 'anxiety', label: 'Anxiety', description: 'Feeling worried or overwhelmed' },
-    { id: 'stress', label: 'Stress', description: 'Dealing with daily pressures' },
-  ];
-
-  const approaches = [
-    { id: 'gentle', label: 'Gentle', description: 'Soft, encouraging, and supportive' },
-    { id: 'direct', label: 'Direct', description: 'Clear, straightforward advice' },
-    { id: 'humorous', label: 'Humorous', description: 'Light-hearted and fun approach' },
-  ];
-
-  const handleFocusIssueToggle = (issueId: string) => {
-    const currentIssues = preferences.wellnessProfile.focusIssues;
-    const updatedIssues = currentIssues.includes(issueId)
-      ? currentIssues.filter(id => id !== issueId)
-      : [...currentIssues, issueId];
-
-    updatePreferences({
-      wellnessProfile: {
-        ...preferences.wellnessProfile,
-        focusIssues: updatedIssues,
-      },
-    });
-  };
-
-  const handleApproachChange = (approach: 'gentle' | 'direct' | 'humorous') => {
-    updatePreferences({
-      wellnessProfile: {
-        ...preferences.wellnessProfile,
-        contentPreferences: {
-          ...preferences.wellnessProfile.contentPreferences,
-          preferredApproach: approach,
-        },
-      },
-    });
-  };
-
+export default function WellnessProfile() {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 ease-in-out"
-    >
-      <div className="flex items-center space-x-3 mb-6">
-        <HeartIcon className="h-6 w-6 text-rose-500" />
-        <h2 className="text-xl font-semibold text-gray-900">Wellness Profile</h2>
-      </div>
-
-      <p className="text-gray-600 mb-6">
-        Let us help you discover content that supports your mental well-being and personal growth.
-        Your preferences will be used to curate more meaningful and helpful content.
-      </p>
-
-      {/* Focus Issues Section */}
-      <div className="mb-8">
+    <div className="bg-white p-6">
+      <h2>Wellness Profile</h2>
+      <p>Coming soon...</p>
+    </div>
+  );
+}
         <button
           onClick={() => setExpandedSection(expandedSection === 'issues' ? null : 'issues')}
           className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
@@ -196,4 +144,6 @@ export default function WellnessProfile(): JSX.Element {
       </div>
     </div>
   );
+
+  return content;
 }
