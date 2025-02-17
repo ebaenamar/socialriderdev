@@ -6,10 +6,27 @@ interface AlgorithmPrompt {
   active: boolean;
 }
 
+interface MentalWellnessProfile {
+  focusIssues: string[];  // ['adhd', 'depression', 'anxiety', etc]
+  engagementPatterns: {
+    timeSpent: number;      // minutes per session
+    sessionFrequency: number; // sessions per day
+    lateNightUsage: boolean; // usage after midnight
+    rapidScrolling: boolean; // quick content consumption
+  };
+  contentPreferences: {
+    needsMotivational: boolean;
+    needsMindfulness: boolean;
+    needsProductivity: boolean;
+    preferredApproach: 'gentle' | 'direct' | 'humorous';
+  };
+}
+
 interface UserPreferences {
   outOfEchoChamber: boolean;
   contentTypes: string[];
   customPrompts: AlgorithmPrompt[];
+  wellnessProfile: MentalWellnessProfile;
 }
 
 interface PreferencesContextType {
@@ -20,7 +37,22 @@ interface PreferencesContextType {
 
 const defaultPreferences: UserPreferences = {
   outOfEchoChamber: false,
-  contentTypes: ['educational', 'entertainment', 'news'],
+  contentTypes: ['educational', 'entertainment', 'news', 'mindfulness', 'motivation', 'self-improvement'],
+  wellnessProfile: {
+    focusIssues: [],
+    engagementPatterns: {
+      timeSpent: 0,
+      sessionFrequency: 0,
+      lateNightUsage: false,
+      rapidScrolling: false
+    },
+    contentPreferences: {
+      needsMotivational: false,
+      needsMindfulness: false,
+      needsProductivity: false,
+      preferredApproach: 'gentle'
+    }
+  },
   customPrompts: [
     {
       name: 'Diverse Perspectives',

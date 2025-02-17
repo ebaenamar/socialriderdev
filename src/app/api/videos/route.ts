@@ -59,8 +59,40 @@ export async function GET(request: Request) {
       .map(item => item.snippet?.description)
       .filter((desc): desc is string => typeof desc === 'string' && desc.length > 0);
 
-    // Build the AI analysis prompt based on user preferences
-    let analysisPrompt = 'Analyze these videos considering:\n';
+    // Build the AI analysis prompt based on user preferences and wellness profile
+    let analysisPrompt = `You are a mental health-aware content curator. Your goal is to help users maintain good mental health while enjoying social media content.\n\n`;
+    
+    // Add wellness-specific instructions
+    if (videoDescriptions.some(desc => desc.toLowerCase().includes('motivation') || desc.toLowerCase().includes('inspiration'))) {
+      analysisPrompt += `Focus on identifying content that:\n`;
+      analysisPrompt += `1. Provides authentic, relatable stories of overcoming challenges\n`;
+      analysisPrompt += `2. Offers practical, actionable advice without being overwhelming\n`;
+      analysisPrompt += `3. Uses positive reinforcement and encouragement\n`;
+      analysisPrompt += `4. Avoids toxic positivity or oversimplified solutions\n`;
+      analysisPrompt += `5. Includes elements of hope and resilience\n\n`;
+    }
+
+    // Add ADHD-friendly content guidelines
+    if (videoDescriptions.some(desc => desc.toLowerCase().includes('adhd') || desc.toLowerCase().includes('focus'))) {
+      analysisPrompt += `For ADHD-friendly content, ensure:\n`;
+      analysisPrompt += `1. Content is concise and engaging\n`;
+      analysisPrompt += `2. Information is broken down into digestible parts\n`;
+      analysisPrompt += `3. Uses visual aids and dynamic presentation\n`;
+      analysisPrompt += `4. Includes practical coping strategies\n`;
+      analysisPrompt += `5. Features relatable ADHD experiences\n\n`;
+    }
+
+    // Add mindfulness and mental health aspects
+    if (videoDescriptions.some(desc => desc.toLowerCase().includes('mindful') || desc.toLowerCase().includes('mental health'))) {
+      analysisPrompt += `For mental health content, prioritize:\n`;
+      analysisPrompt += `1. Evidence-based information\n`;
+      analysisPrompt += `2. Content from qualified professionals\n`;
+      analysisPrompt += `3. Gentle and non-judgmental approaches\n`;
+      analysisPrompt += `4. Practical self-care techniques\n`;
+      analysisPrompt += `5. Community support and shared experiences\n\n`;
+    }
+
+    analysisPrompt += 'Analyze these videos considering:\n';
     
     if (outOfEchoChamber) {
       analysisPrompt += '- Look for content that challenges common viewpoints and presents alternative perspectives\n';
