@@ -2,6 +2,15 @@
 
 All notable changes to FeedFlip will be documented in this file.
 
+## [1.0.1] - 2025-02-17
+
+### Fixed
+- Fixed undefined error in engagement pattern tracking
+- Added null checks for wellness profile access
+- Improved error handling and type safety
+- Enhanced state management reliability
+- Added fallback values for metrics
+
 ## [1.0.0] - 2025-02-17
 
 ### Added
