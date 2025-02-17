@@ -72,24 +72,24 @@ export default function WellnessProfile() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-2 sm:space-y-0">
         <h2 className="text-2xl font-bold text-gray-900">Wellness Profile</h2>
         {getEngagementStatus() && (
           <div className="flex items-center text-amber-500">
             <ExclamationTriangleIcon className="h-6 w-6 mr-2" />
-            <span className="text-sm font-medium">High Engagement Detected</span>
+            <span className="text-sm font-medium whitespace-nowrap">High Engagement Detected</span>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors">
           <div className="flex items-center mb-3">
             <ClockIcon className="h-6 w-6 text-indigo-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">Time Spent</h3>
           </div>
-          <p className="text-3xl font-bold text-indigo-600">
+          <p className="text-2xl sm:text-3xl font-bold text-indigo-600">
             {preferences.wellnessProfile?.engagementPatterns?.timeSpent || 0} min
           </p>
         </div>

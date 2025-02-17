@@ -30,9 +30,9 @@ export default function UserPreferences() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+      className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8"
     >
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Design Your Feed</h2>
           <p className="text-gray-600">
@@ -80,7 +80,7 @@ export default function UserPreferences() {
             <AdjustmentsHorizontalIcon className="h-6 w-6 text-indigo-600" />
             <h3 className="text-lg font-medium text-gray-900">Content Types</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {['educational', 'entertainment', 'news', 'tutorials', 'discussions', 'creative'].map((type) => (
               <label key={type} className="flex items-center space-x-3">
                 <input

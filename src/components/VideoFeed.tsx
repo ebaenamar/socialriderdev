@@ -97,14 +97,14 @@ export default function VideoFeed() {
   const allVideos = data?.pages.flatMap((page) => page.videos) ?? [];
 
   return (
-    <div id="feed" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div id="feed" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
       {allVideos.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">No videos found matching your criteria</p>
           <p className="text-sm text-gray-400">Try adjusting your search terms or preferences</p>
         </div>
       )}
-      <div className="max-w-3xl mx-auto mb-12">
+      <div className="max-w-3xl mx-auto mb-6 sm:mb-12">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2 text-gray-600">
             <AdjustmentsHorizontalIcon className="h-5 w-5" />
@@ -122,7 +122,7 @@ export default function VideoFeed() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Type 'sad', 'happy', 'motivated' or any topic..."
-            className="w-full p-4 pr-12 text-lg border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-colors bg-white text-gray-900 placeholder-gray-500 shadow-sm"
+            className="w-full p-3 sm:p-4 pr-10 sm:pr-12 text-base sm:text-lg border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-colors bg-white text-gray-900 placeholder-gray-500 shadow-sm"
           />
           <button
             type="submit"
@@ -142,7 +142,7 @@ export default function VideoFeed() {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
         }
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8"
       >
         {allVideos.map((video: Video, index: number) => (
           <div
@@ -150,7 +150,7 @@ export default function VideoFeed() {
             className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-all duration-300 opacity-0 animate-fadeIn"
           >
             <div className="relative group">
-              <div className="relative w-full h-48">
+              <div className="relative w-full h-40 sm:h-48">
                 <Image
                   src={video.snippet.thumbnails.high.url}
                   alt={video.snippet.title}
@@ -163,14 +163,14 @@ export default function VideoFeed() {
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
             </div>
             <div className="p-6">
-              <h3 className="font-bold text-2xl text-gray-900 mb-2 line-clamp-2 tracking-tight">{video.snippet.title}</h3>
-              <p className="text-base font-medium text-gray-700 mb-4">{video.snippet.channelTitle}</p>
+              <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-gray-900 mb-2 line-clamp-2 tracking-tight">{video.snippet.title}</h3>
+              <p className="text-sm sm:text-base font-medium text-gray-700 mb-3 sm:mb-4">{video.snippet.channelTitle}</p>
               <div className="flex justify-between items-center">
                 <a
                   href={`https://www.youtube.com/shorts/${video.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors w-full sm:w-auto justify-center"
                 >
                   Watch Short
                 </a>
