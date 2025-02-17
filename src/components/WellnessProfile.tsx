@@ -5,7 +5,7 @@ import { usePreferences } from '@/contexts/PreferencesContext';
 
 export default function WellnessProfile() {
   const { preferences, updatePreferences } = usePreferences();
-  const [showDetails, setShowDetails] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>('issues');
 
   const focusIssues = [
     { id: 'adhd', label: 'ADHD', description: 'Difficulty focusing or managing time' },
@@ -64,6 +64,15 @@ export default function WellnessProfile() {
 
       {/* Focus Issues Section */}
       <div className="mb-8">
+        <button
+          onClick={() => setExpandedSection(expandedSection === 'issues' ? null : 'issues')}
+          className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
+        >
+          <span className="font-medium text-gray-900">Focus Issues</span>
+          <span className="text-gray-500">{preferences.wellnessProfile.focusIssues.length} selected</span>
+        </button>
+        
+        {expandedSection === 'issues' && (
         <h3 className="text-lg font-medium text-gray-900 mb-4">What would you like support with?</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {focusIssues.map(issue => (
@@ -91,10 +100,20 @@ export default function WellnessProfile() {
             </label>
           ))}
         </div>
+        )}
       </div>
 
       {/* Content Approach Section */}
       <div className="mb-8">
+        <button
+          onClick={() => setExpandedSection(expandedSection === 'approach' ? null : 'approach')}
+          className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
+        >
+          <span className="font-medium text-gray-900">Content Approach</span>
+          <span className="text-gray-500">{preferences.wellnessProfile.contentPreferences.preferredApproach}</span>
+        </button>
+
+        {expandedSection === 'approach' && (
         <h3 className="text-lg font-medium text-gray-900 mb-4">How would you like content to be presented?</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {approaches.map(approach => (
@@ -112,10 +131,22 @@ export default function WellnessProfile() {
             </button>
           ))}
         </div>
+        )}
       </div>
 
       {/* Content Preferences Section */}
       <div>
+        <button
+          onClick={() => setExpandedSection(expandedSection === 'preferences' ? null : 'preferences')}
+          className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
+        >
+          <span className="font-medium text-gray-900">Additional Preferences</span>
+          <span className="text-gray-500">
+            {Object.values(preferences.wellnessProfile.contentPreferences).filter(Boolean).length - 1} enabled
+          </span>
+        </button>
+
+        {expandedSection === 'preferences' && (
         <h3 className="text-lg font-medium text-gray-900 mb-4">Additional Preferences</h3>
         <div className="space-y-4">
           {[
@@ -163,6 +194,7 @@ export default function WellnessProfile() {
             </label>
           ))}
         </div>
+        )}
       </div>
     </motion.div>
   );
