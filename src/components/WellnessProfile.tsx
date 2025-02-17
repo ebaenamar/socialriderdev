@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { HeartIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { usePreferences } from '@/contexts/PreferencesContext';
 
-function WellnessProfile() {
+export default function WellnessProfile(): JSX.Element {
   const { preferences, updatePreferences } = usePreferences();
   const [expandedSection, setExpandedSection] = useState<string | null>('issues');
 
