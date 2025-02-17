@@ -3,38 +3,68 @@ import { BeakerIcon, LightBulbIcon, GlobeAltIcon, SparklesIcon } from '@heroicon
 
 const features = [
   {
-    name: 'AI-Powered Curation',
-    description: 'Our advanced AI analyzes content for educational value and perspective diversity.',
+    name: 'Design Your Own AI',
+    description: {
+      main: 'Create and customize your personal content curation algorithms.',
+      details: [
+        'Write natural language rules for content filtering',
+        'Combine multiple algorithms for precise results',
+        'Adjust and fine-tune in real-time'
+      ]
+    },
     icon: BeakerIcon,
   },
   {
-    name: 'Break Echo Chambers',
-    description: 'Discover content beyond your usual recommendations and expand your horizons.',
+    name: 'Echo Chamber Protection',
+    description: {
+      main: 'Deliberately discover content outside your usual perspective.',
+      details: [
+        'Find opposing viewpoints on topics',
+        'Explore different cultural perspectives',
+        'Balance your content consumption'
+      ]
+    },
     icon: GlobeAltIcon,
   },
   {
-    name: 'Smart Discovery',
-    description: 'Find content that matters to you while maintaining a balanced perspective.',
+    name: 'Smart Content Filters',
+    description: {
+      main: 'Set precise criteria for the content you want to discover.',
+      details: [
+        'Choose specific content categories',
+        'Set quality and depth thresholds',
+        'Filter by topic and perspective'
+      ]
+    },
     icon: LightBulbIcon,
   },
   {
-    name: 'Enhanced Experience',
-    description: 'Enjoy a clean, modern interface designed for discovery and learning.',
+    name: 'Continuous Learning',
+    description: {
+      main: 'Your feed evolves as you interact and customize preferences.',
+      details: [
+        'Algorithms adapt to your feedback',
+        'Save and modify successful filters',
+        'Share algorithms with others'
+      ]
+    },
     icon: SparklesIcon,
   },
 ];
+
+import { BeakerIcon, GlobeAltIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 export default function Features() {
   return (
     <div id="features" className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:text-center">
-          <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+          <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">Your Personal Algorithm</h2>
           <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-            A Better Way to Discover Content
+            Take Control of Your Content
           </p>
           <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-            Experience short-form content the way it should be: diverse, enriching, and tailored to genuine discovery.
+            Design, customize, and fine-tune your own AI-powered content curation algorithms. Break free from generic recommendations.
           </p>
         </div>
 
@@ -54,7 +84,14 @@ export default function Features() {
                   </div>
                   <p className="ml-16 text-lg leading-6 font-medium text-gray-900">{feature.name}</p>
                 </dt>
-                <dd className="mt-2 ml-16 text-base text-gray-500">{feature.description}</dd>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  <p>{feature.description.main}</p>
+                  <ul className="mt-2 space-y-1 text-sm list-disc pl-4">
+                    {feature.description.details.map((detail, i) => (
+                      <li key={i}>{detail}</li>
+                    ))}
+                  </ul>
+                </dd>
               </motion.div>
             ))}
           </dl>

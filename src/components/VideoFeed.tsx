@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 interface Video {
   id: string;
@@ -28,11 +29,16 @@ interface VideoResponse {
 export default function VideoFeed() {
   const [topic, setTopic] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [showPreferences, setShowPreferences] = useState(false);
+  const { preferences } = usePreferences();
   
   const fetchVideos = async ({ pageParam = '' }) => {
     const params = new URLSearchParams({
       pageToken: pageParam,
       topic: topic,
+      outOfEchoChamber: preferences.outOfEchoChamber.toString(),
+      contentTypes: preferences.contentTypes.join(','),
+      activePrompts: JSON.stringify(preferences.customPrompts.filter(p => p.active)),
     });
     const response = await fetch(`/api/videos?${params}`);
     if (!response.ok) throw new Error('Network response was not ok');
@@ -74,6 +80,20 @@ export default function VideoFeed() {
   return (
     <div id="feed" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="max-w-3xl mx-auto mb-12">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setShowPreferences(!showPreferences)}
+            className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors"
+          >
+            <AdjustmentsHorizontalIcon className="h-5 w-5" />
+            <span>Preferences</span>
+          </button>
+          {preferences.outOfEchoChamber && (
+            <span className="text-sm text-indigo-600">
+              Echo Chamber Protection: Active
+            </span>
+          )}
+        </div>
         <form onSubmit={handleSearch} className="relative">
           <input
             type="text"

@@ -5,10 +5,19 @@ import OpenAI from 'openai';
 const youtube = google.youtube('v3');
 const openai = new OpenAI();
 
+interface AlgorithmPrompt {
+  name: string;
+  prompt: string;
+  active: boolean;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const pageToken = searchParams.get('pageToken');
   const topic = searchParams.get('topic') || '';
+  const outOfEchoChamber = searchParams.get('outOfEchoChamber') === 'true';
+  const contentTypes = searchParams.get('contentTypes')?.split(',') || [];
+  const activePrompts = JSON.parse(searchParams.get('activePrompts') || '[]') as AlgorithmPrompt[];
   
   try {
     const response = await youtube.search.list({
@@ -50,12 +59,28 @@ export async function GET(request: Request) {
       .map(item => item.snippet?.description)
       .filter((desc): desc is string => typeof desc === 'string' && desc.length > 0);
 
+    // Build the AI analysis prompt based on user preferences
+    let analysisPrompt = 'Analyze these videos considering:\n';
+    
+    if (outOfEchoChamber) {
+      analysisPrompt += '- Look for content that challenges common viewpoints and presents alternative perspectives\n';
+    }
+    
+    if (contentTypes.length > 0) {
+      analysisPrompt += `- Focus on content types: ${contentTypes.join(', ')}\n`;
+    }
+    
+    // Add custom algorithm prompts
+    activePrompts.forEach(prompt => {
+      analysisPrompt += `- ${prompt.prompt}\n`;
+    });
+    
+    analysisPrompt += `\nVideo descriptions:\n${videoDescriptions.join('\n')}`;
+
     const aiAnalysis = await openai.chat.completions.create({
       messages: [{
         role: 'system',
-        content: videoDescriptions.length > 0
-          ? `Analyze these video descriptions and rate their diversity of perspective and educational value: ${videoDescriptions.join('\n')}`
-          : 'No video descriptions available for analysis.'
+        content: analysisPrompt
       }],
       model: 'gpt-3.5-turbo',
     });

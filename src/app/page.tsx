@@ -3,6 +3,7 @@
 import VideoFeed from '@/components/VideoFeed';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
+import UserPreferences from '@/components/UserPreferences';
 
 export default function Home() {
   return (
@@ -24,6 +25,7 @@ export default function Home() {
       <main className="pt-16">
         <Hero />
         <Features />
+        <UserPreferences />
         <VideoFeed />
       </main>
 
