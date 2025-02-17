@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { HeartIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { usePreferences } from '@/contexts/PreferencesContext';
 
-export default function WellnessProfile() {
+function WellnessProfile() {
   const { preferences, updatePreferences } = usePreferences();
   const [expandedSection, setExpandedSection] = useState<string | null>('issues');
 
