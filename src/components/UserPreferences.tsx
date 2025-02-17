@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AdjustmentsHorizontalIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { AdjustmentsHorizontalIcon, GlobeAltIcon, BeakerIcon } from '@heroicons/react/24/outline';
 
 import { usePreferences } from '@/contexts/PreferencesContext';
 

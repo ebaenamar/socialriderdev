@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Image from 'next/image';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -150,11 +151,16 @@ export default function VideoFeed() {
             className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300"
           >
             <div className="relative group">
-              <img
-                src={video.snippet.thumbnails.high.url}
-                alt={video.snippet.title}
-                className="w-full h-48 object-cover"
-              />
+              <div className="relative w-full h-48">
+                <Image
+                  src={video.snippet.thumbnails.high.url}
+                  alt={video.snippet.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                  priority={index < 4}
+                />
+              </div>
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
             </div>
             <div className="p-6">
