@@ -12,6 +12,12 @@ interface AlgorithmPrompt {
 }
 
 export async function GET(request: Request) {
+  if (!process.env.YOUTUBE_API_KEY || !process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: 'Missing API configuration' },
+      { status: 500 }
+    );
+  }
   const { searchParams } = new URL(request.url);
   const pageToken = searchParams.get('pageToken');
   const topic = searchParams.get('topic') || '';
@@ -124,6 +130,10 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error fetching videos:', error);
-    return NextResponse.json({ error: 'Failed to fetch videos' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json(
+      { error: 'Failed to fetch videos', details: errorMessage },
+      { status: 500 }
+    );
   }
 }
