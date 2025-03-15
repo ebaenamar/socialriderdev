@@ -35,7 +35,8 @@ export default function VideoFeed() {
 
   const { preferences } = usePreferences() as { preferences: { outOfEchoChamber: boolean; contentTypes: string[]; customPrompts: { active: boolean }[] } };
   
-  const fetchVideos = async ({ pageParam = '' }: { pageParam?: string }) => {
+  const fetchVideos = async (context: { pageParam?: unknown }) => {
+    const pageParam = context.pageParam ? String(context.pageParam) : '';
     const params = new URLSearchParams({
       pageToken: pageParam,
       topic: topic,
@@ -57,7 +58,7 @@ export default function VideoFeed() {
   } = useInfiniteQuery({
     queryKey: ['videos', topic],
     queryFn: fetchVideos,
-    getNextPageParam: (lastPage: VideoResponse) => lastPage.nextPageToken as unknown,
+    getNextPageParam: (lastPage: VideoResponse) => lastPage.nextPageToken || undefined,
     initialPageParam: '',
   });
 
