@@ -25,18 +25,50 @@ export async function GET(request: Request) {
   const topic = searchParams.get('topic') || '';
   const outOfEchoChamber = searchParams.get('outOfEchoChamber') === 'true';
   const contentTypes = searchParams.get('contentTypes')?.split(',') || [];
-  const activePrompts = JSON.parse(searchParams.get('activePrompts') || '[]') as AlgorithmPrompt[];
-  
+  let activePrompts: AlgorithmPrompt[] = [];
   try {
-    const response = await youtube.search.list({
-      part: ['snippet'],
-      maxResults: 10,
-      q: topic,
-      type: ['video'],
-      videoDuration: 'short',
-      pageToken: pageToken || undefined,
-      key: process.env.YOUTUBE_API_KEY,
-    });
+    activePrompts = JSON.parse(searchParams.get('activePrompts') || '[]') as AlgorithmPrompt[];
+  } catch (e) {
+    console.error('Error parsing activePrompts:', e);
+    // Continue with empty array if parsing fails
+  }
+  
+  // Mock data for fallback when API is unavailable
+  const getMockVideos = () => {
+    return {
+      items: Array(10).fill(null).map((_, index) => ({
+        id: { videoId: `mock-video-${index}` },
+        snippet: {
+          title: `Demo Video ${index + 1}`,
+          description: `This is a demo video for testing purposes. Topic: ${topic || 'general'}`,
+          thumbnails: {
+            high: {
+              url: 'https://via.placeholder.com/480x360.png?text=Demo+Video',
+            },
+          },
+          channelTitle: 'Demo Channel',
+        },
+      })),
+      nextPageToken: 'mockNextPage',
+    };
+  };
+
+  try {
+    let response;
+    try {
+      response = await youtube.search.list({
+        part: ['snippet'],
+        maxResults: 10,
+        q: topic,
+        type: ['video'],
+        videoDuration: 'short',
+        pageToken: pageToken || undefined,
+        key: process.env.YOUTUBE_API_KEY,
+      });
+    } catch (youtubeError) {
+      console.error('YouTube API error, using mock data:', youtubeError);
+      response = { data: getMockVideos() };
+    }
 
     if (!response.data.items) {
       return NextResponse.json({ error: 'No videos found' }, { status: 404 });
@@ -52,11 +84,18 @@ export async function GET(request: Request) {
     }
 
     // Get detailed video information
-    const videosDetails = await youtube.videos.list({
-      part: ['snippet', 'statistics'],
-      id: videoIds,
-      key: process.env.YOUTUBE_API_KEY,
-    });
+    let videosDetails;
+    try {
+      videosDetails = await youtube.videos.list({
+        part: ['snippet', 'statistics'],
+        id: videoIds,
+        key: process.env.YOUTUBE_API_KEY,
+      });
+    } catch (detailsError) {
+      console.error('Error fetching video details, using mock data:', detailsError);
+      // Use the same mock data for details if the API call fails
+      videosDetails = { data: { items: response.data.items } };
+    }
 
     if (!videosDetails.data.items) {
       return NextResponse.json({ error: 'No video details found' }, { status: 404 });
@@ -117,18 +156,25 @@ export async function GET(request: Request) {
     
     analysisPrompt += `\nVideo descriptions:\n${videoDescriptions.join('\n')}`;
 
-    const aiAnalysis = await openai.chat.completions.create({
-      messages: [{
-        role: 'system',
-        content: analysisPrompt
-      }],
-      model: 'gpt-3.5-turbo',
-    });
+    let aiInsights = '';
+    try {
+      const aiAnalysis = await openai.chat.completions.create({
+        messages: [{
+          role: 'system',
+          content: analysisPrompt
+        }],
+        model: 'gpt-3.5-turbo',
+      });
+      aiInsights = aiAnalysis.choices[0].message.content || '';
+    } catch (e) {
+      console.error('Error calling OpenAI API:', e);
+      // Continue without AI insights if OpenAI call fails
+    }
 
     return NextResponse.json({
       videos: videosDetails.data.items,
       nextPageToken: response.data.nextPageToken,
-      aiInsights: aiAnalysis.choices[0].message.content,
+      aiInsights,
     });
   } catch (error) {
     console.error('Error fetching videos:', error);
