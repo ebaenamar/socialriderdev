@@ -33,15 +33,15 @@ export default function VideoFeed() {
   const [topic, setTopic] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
-  const { preferences } = usePreferences();
+  const { preferences } = usePreferences() as { preferences: { outOfEchoChamber: boolean; contentTypes: string[]; customPrompts: { active: boolean }[] } };
   
-  const fetchVideos = async ({ pageParam = '' }) => {
+  const fetchVideos = async ({ pageParam = '' }: { pageParam?: string }) => {
     const params = new URLSearchParams({
       pageToken: pageParam,
       topic: topic,
       outOfEchoChamber: preferences.outOfEchoChamber.toString(),
       contentTypes: preferences.contentTypes.join(','),
-      activePrompts: JSON.stringify(preferences.customPrompts.filter(p => p.active)),
+      activePrompts: JSON.stringify(preferences.customPrompts.filter((p: { active: boolean }) => p.active)),
     });
     const response = await fetch(`/api/videos?${params}`);
     if (!response.ok) throw new Error('Network response was not ok');
@@ -61,7 +61,7 @@ export default function VideoFeed() {
     initialPageParam: '',
   });
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setTopic(searchInput);
   };
@@ -84,13 +84,23 @@ export default function VideoFeed() {
         </svg>
       </div>
       <p className="text-red-600 font-medium">Error loading videos</p>
-      <p className="text-gray-500 text-sm">Please check your connection and try again</p>
-      <button 
-        onClick={() => window.location.reload()}
-        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-      >
-        Retry
-      </button>
+      <p className="text-gray-500 text-sm max-w-md text-center">
+        The YouTube API has strict quota limits. We're showing demo content while we resolve this issue.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+        >
+          Retry
+        </button>
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors"
+        >
+          Go to Home
+        </button>
+      </div>
     </div>
   );
 

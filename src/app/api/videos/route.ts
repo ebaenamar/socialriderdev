@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 const youtube = google.youtube('v3');
-const openai = new OpenAI();
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 interface AlgorithmPrompt {
   name: string;
@@ -42,8 +44,8 @@ export async function GET(request: Request) {
 
     // Extract video IDs and ensure they are valid strings
     const videoIds = response.data.items
-      .map(item => item.id?.videoId)
-      .filter((id): id is string => typeof id === 'string' && id.length > 0);
+      .map((item: any) => item.id?.videoId)
+      .filter((id: any): id is string => typeof id === 'string' && id.length > 0);
     
     if (videoIds.length === 0) {
       return NextResponse.json({ error: 'No valid video IDs found' }, { status: 404 });
@@ -62,14 +64,14 @@ export async function GET(request: Request) {
 
     // Analyze content with OpenAI for better recommendations
     const videoDescriptions = videosDetails.data.items
-      .map(item => item.snippet?.description)
-      .filter((desc): desc is string => typeof desc === 'string' && desc.length > 0);
+      .map((item: any) => item.snippet?.description)
+      .filter((desc: any): desc is string => typeof desc === 'string' && desc.length > 0);
 
     // Build the AI analysis prompt based on user preferences and wellness profile
     let analysisPrompt = `You are a mental health-aware content curator. Your goal is to help users maintain good mental health while enjoying social media content.\n\n`;
     
     // Add wellness-specific instructions
-    if (videoDescriptions.some(desc => desc.toLowerCase().includes('motivation') || desc.toLowerCase().includes('inspiration'))) {
+    if (videoDescriptions.some((desc: string) => desc.toLowerCase().includes('motivation') || desc.toLowerCase().includes('inspiration'))) {
       analysisPrompt += `Focus on identifying content that:\n`;
       analysisPrompt += `1. Provides authentic, relatable stories of overcoming challenges\n`;
       analysisPrompt += `2. Offers practical, actionable advice without being overwhelming\n`;
@@ -79,7 +81,7 @@ export async function GET(request: Request) {
     }
 
     // Add ADHD-friendly content guidelines
-    if (videoDescriptions.some(desc => desc.toLowerCase().includes('adhd') || desc.toLowerCase().includes('focus'))) {
+    if (videoDescriptions.some((desc: string) => desc.toLowerCase().includes('adhd') || desc.toLowerCase().includes('focus'))) {
       analysisPrompt += `For ADHD-friendly content, ensure:\n`;
       analysisPrompt += `1. Content is concise and engaging\n`;
       analysisPrompt += `2. Information is broken down into digestible parts\n`;
@@ -89,7 +91,7 @@ export async function GET(request: Request) {
     }
 
     // Add mindfulness and mental health aspects
-    if (videoDescriptions.some(desc => desc.toLowerCase().includes('mindful') || desc.toLowerCase().includes('mental health'))) {
+    if (videoDescriptions.some((desc: string) => desc.toLowerCase().includes('mindful') || desc.toLowerCase().includes('mental health'))) {
       analysisPrompt += `For mental health content, prioritize:\n`;
       analysisPrompt += `1. Evidence-based information\n`;
       analysisPrompt += `2. Content from qualified professionals\n`;
