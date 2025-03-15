@@ -57,11 +57,11 @@ export default function VideoFeed() {
   } = useInfiniteQuery({
     queryKey: ['videos', topic],
     queryFn: fetchVideos,
-    getNextPageParam: (lastPage: VideoResponse) => lastPage.nextPageToken,
+    getNextPageParam: (lastPage: VideoResponse) => lastPage.nextPageToken as unknown,
     initialPageParam: '',
   });
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setTopic(searchInput);
   };
@@ -85,7 +85,7 @@ export default function VideoFeed() {
       </div>
       <p className="text-red-600 font-medium">Error loading videos</p>
       <p className="text-gray-500 text-sm max-w-md text-center">
-        The YouTube API has strict quota limits. We're showing demo content while we resolve this issue.
+        The YouTube API has strict quota limits. We&apos;re showing demo content while we resolve this issue.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
         <button 
@@ -130,7 +130,7 @@ export default function VideoFeed() {
           <input
             type="text"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e: { target: { value: string } }) => setSearchInput(e.target.value)}
             placeholder="Type 'sad', 'happy', 'motivated' or any topic..."
             className="w-full p-3 sm:p-4 pr-10 sm:pr-12 text-base sm:text-lg border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-colors bg-white text-gray-900 placeholder-gray-500 shadow-sm"
           />

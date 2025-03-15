@@ -44,8 +44,8 @@ export async function GET(request: Request) {
 
     // Extract video IDs and ensure they are valid strings
     const videoIds = response.data.items
-      .map((item: any) => item.id?.videoId)
-      .filter((id: any): id is string => typeof id === 'string' && id.length > 0);
+      .map((item: { id?: { videoId?: string } }) => item.id?.videoId)
+      .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0);
     
     if (videoIds.length === 0) {
       return NextResponse.json({ error: 'No valid video IDs found' }, { status: 404 });
@@ -64,8 +64,8 @@ export async function GET(request: Request) {
 
     // Analyze content with OpenAI for better recommendations
     const videoDescriptions = videosDetails.data.items
-      .map((item: any) => item.snippet?.description)
-      .filter((desc: any): desc is string => typeof desc === 'string' && desc.length > 0);
+      .map((item: { snippet?: { description?: string } }) => item.snippet?.description)
+      .filter((desc: unknown): desc is string => typeof desc === 'string' && desc.length > 0);
 
     // Build the AI analysis prompt based on user preferences and wellness profile
     let analysisPrompt = `You are a mental health-aware content curator. Your goal is to help users maintain good mental health while enjoying social media content.\n\n`;

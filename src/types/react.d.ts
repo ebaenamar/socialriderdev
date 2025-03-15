@@ -1,18 +1,20 @@
 declare module 'react' {
-  export * from 'react';
   export interface CSSProperties {
-    [key: string]: any;
+    [key: string]: unknown;
   }
+  
+  export function useState<T>(initialState: T | (() => T)): [T, (newState: T | ((prevState: T) => T)) => void];
+  export function useState<T = undefined>(): [T | undefined, (newState: T | ((prevState: T | undefined) => T)) => void];
 }
 
 declare module 'react/jsx-runtime' {
-  export default any;
-  export const jsx: any;
-  export const jsxs: any;
+  export default unknown;
+  export const jsx: unknown;
+  export const jsxs: unknown;
 }
 
 declare namespace JSX {
   interface IntrinsicElements {
-    [elemName: string]: any;
+    [elemName: string]: unknown;
   }
 }
