@@ -5,7 +5,11 @@ import { PreferencesProvider } from '@/contexts/PreferencesContext';
 
 const queryClient = new QueryClient();
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+type ProvidersProps = {
+  children: any;
+};
+
+export default function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <PreferencesProvider>

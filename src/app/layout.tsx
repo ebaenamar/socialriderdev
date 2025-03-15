@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from '@/components/Providers';
+import Providers from '@/app/providers';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,11 +26,13 @@ export const metadata: Metadata = {
 
 
 
+type RootLayoutProps = {
+  children: any;
+};
+
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: RootLayoutProps) {
   return (
     <html lang="en">
       <body

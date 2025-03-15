@@ -69,7 +69,11 @@ const defaultPreferences: UserPreferences = {
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 
-export function PreferencesProvider({ children }: { children: ReactNode }) {
+type PreferencesProviderProps = {
+  children: any;
+};
+
+export function PreferencesProvider({ children }: PreferencesProviderProps) {
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('userPreferences');
